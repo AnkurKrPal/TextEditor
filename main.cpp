@@ -41,13 +41,13 @@ int main(){
 
     while(backspace){
         if(current_piece.length==0){
-            for(int i=0;i<Pieces.size();i++){
+            for(int i=1;i<Pieces.size();i++){
                 if(Pieces[i].start == current_piece.start && Pieces[i].source == current_piece.source){
                     Pieces.erase(Pieces.begin()+i);
                     current_piece = Pieces[i-1];
                 }
             }
         }
-        current_piece.length--;
+        if(current_piece.length >0) current_piece.length--;
     }
 }

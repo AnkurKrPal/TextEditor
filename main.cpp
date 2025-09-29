@@ -6,7 +6,7 @@ typedef struct piece{
     int length;
 }piece;
 class pieceTable{
-    
+
     private:
         vector<piece> Pieces;
         int state=0;
@@ -30,7 +30,7 @@ class pieceTable{
                     int len=it.length;
                     it.length=originalIndex-n;
                     piece newPiece=new piece;
-                    newPiece.source="add";
+                    newPiece.source=it.source;
                     newPiece.start=originalIndex;
                     newPiece.length=len+n-originalIndex;
                     Pieces.insert(i,newPiece);

@@ -5,18 +5,18 @@ using namespace std;
 
 void PieceTable::insert(char c, int index) {
     if(state==0){
-        current_piece.source = "add";
-        current_piece.start = add.length();
+        current_piece.source = ADD;
+        current_piece.start = addString.length();
         current_piece.length = 1;
         int i= nextIndex(index);
-        add.push_back(c);
+        addString.push_back(c);
         Pieces.insert(Pieces.begin()+i , current_piece);
         state = 1;
     }
 
     else if(state == 1){
         current_piece.length++;
-        add.push_back(c);
+        addString.push_back(c);
     }
 }
 

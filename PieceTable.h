@@ -25,7 +25,9 @@ public:
 private:
     string originalString;
     string addString;
-    vector<Piece> piece;
+    vector<Piece> Pieces;
+    int state;
+    piece current_piece;
 };
 
 #endif

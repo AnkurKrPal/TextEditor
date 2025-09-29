@@ -19,7 +19,7 @@ public:
     }piece;
 
     void insert(char c, int index);
-    void deletion();
+    void deletion(int index);
     int nextIndex(int index);
 
 private:

@@ -20,8 +20,21 @@ void PieceTable::insert(char c, int index) {
     }
 }
 
-void PieceTable::deletion() {
+void PieceTable::deletion(int index) {
+    if(current_piece.length >0) current_piece.length--;
+    else{
+        int it = nextIndex(index);
+        if(it==0)return ;
+        current_piece = Pieces[it-1];
+        while(current_piece.length==0){
+            // Pieces.erase(Pieces.begin()+it-1);
+            current_piece = Pieces[it-1];
+            if(it>=1)it--;
+        }
+        current_piece.length--;
+    }
     
+    state =0 ;
 }
 
 int PieceTable::nextIndex(int index){

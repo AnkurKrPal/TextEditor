@@ -18,8 +18,9 @@ public:
         size_t length;
     }piece;
 
-    void insert();
+    void insert(char c, int index);
     void deletion();
+    int nextIndex(int index);
 
 private:
     string originalString;

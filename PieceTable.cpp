@@ -3,10 +3,48 @@ using namespace std;
 
 using namespace std;
 
-void PieceTable::insert() {
+void PieceTable::insert(char c, int index) {
+    if(state==0){
+        current_piece.source = "add";
+        current_piece.start = add.length();
+        current_piece.length = 1;
+        int i= nextIndex(index);
+        add.push_back(c);
+        Pieces.insert(Pieces.begin()+i , current_piece);
+        state = 1;
+    }
 
+    else if(state == 1){
+        current_piece.length++;
+        add.push_back(c);
+    }
 }
 
 void PieceTable::deletion() {
     
+}
+
+int PieceTable::nextIndex(int index){
+    int originalIndex=index;
+    int i=0;
+    if(index==0)return 0;
+    for(auto &it:Pieces){
+        i++;
+        index-=it.length;
+        if(index==0){
+            return i;
+        }
+        if(index<0){
+            int n=it.start;
+            int len=it.length;
+            it.length=originalIndex-n;
+            piece* newPiece=new piece;
+            newPiece->source=it.source;
+            newPiece->start=originalIndex;
+            newPiece->length=len+n-originalIndex;
+            Pieces.insert(Pieces.begin() + i, *newPiece);
+            return i;
+        }
+    }
+    return Pieces.size();
 }

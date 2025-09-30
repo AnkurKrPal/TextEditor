@@ -27,7 +27,7 @@ private:
     string addString;
     vector<Piece> Pieces;
     int state;
-    piece current_piece;
+    piece* current_piece;
 };
 
 #endif

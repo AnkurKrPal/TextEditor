@@ -5,35 +5,62 @@ using namespace std;
 
 void PieceTable::insert(char c, int index) {
     if(state==0){
-        current_piece.source = ADD;
-        current_piece.start = addString.length();
-        current_piece.length = 1;
+        current_piece->source = ADD;
+        current_piece->start = addString.length();
+        current_piece->length = 1;
         int i= nextIndex(index);
         addString.push_back(c);
-        Pieces.insert(Pieces.begin()+i , current_piece);
+        Pieces.insert(Pieces.begin()+i , *current_piece);
         state = 1;
     }
 
     else if(state == 1){
-        current_piece.length++;
+        current_piece->length++;
         addString.push_back(c);
     }
 }
 
 void PieceTable::deletion(int index) {
-    if(current_piece.length >0) current_piece.length--;
-    else{
+    if(current_piece == NULL){
         int it = nextIndex(index);
         if(it==0)return ;
-        current_piece = Pieces[it-1];
-        while(current_piece.length==0){
-            // Pieces.erase(Pieces.begin()+it-1);
-            current_piece = Pieces[it-1];
-            if(it>=1)it--;
+        current_piece = &Pieces[it-1];
+        while(current_piece->length == 0){
+            if( it >= 1) it--;
+            else return;
+            current_piece = &Pieces[it-1];
+            Pieces.erase(Pieces.begin() + it);
         }
-        current_piece.length--;
+        current_piece->length--;
+        
+        if(current_piece->length == 0){
+            Pieces.erase(Pieces.begin() + it - 1);
+            if(it -2 >= 0) current_piece = &Pieces[it-2];
+            else current_piece = NULL ;
+        }
     }
-    
+
+    else{
+        if(current_piece->length > 1)current_piece->length--;
+        else{
+            int it = nextIndex(index);
+            if(it==0)return ;
+            current_piece = &Pieces[it-1];
+            while(current_piece->length == 0){
+                if( it >= 1) it--;
+                else return;
+                current_piece = &Pieces[it-1];
+                Pieces.erase(Pieces.begin() + it);
+            }
+            current_piece->length--;
+            
+            if(current_piece->length == 0){
+                Pieces.erase(Pieces.begin() + it - 1);
+                if(it - 2 >= 0) current_piece = &Pieces[it-2];
+                else current_piece = NULL ;
+            }
+        }
+    }
     state =0 ;
 }
 

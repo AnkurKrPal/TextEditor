@@ -77,6 +77,20 @@ void PieceTable::deletion(int index) {
     state = 0 ;
 }
 
+void PieceTable::view(){
+    for(auto it:Pieces){
+        if(it.source==ADD){
+            for(int i=0;i<it.length;i++){
+                cout<<addString[i+it.source];
+            }
+        }else{
+            for(int i=0;i<it.length;i++){
+                cout<<originalString[i+it.source];
+            }
+        }
+    }
+}
+
 int PieceTable::nextIndex(int index){
     int originalIndex=index;
     int i=0;

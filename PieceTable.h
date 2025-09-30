@@ -27,8 +27,8 @@ public:
     piece* current_piece = NULL;
     
 private:
-    string originalString;
-    string addString;
+    string originalString="";
+    string addString="";
     vector<Piece> Pieces;
     
 };

@@ -8,7 +8,7 @@ int main(){
     cin>>queries;
     while(queries--){
         char c;
-        cin>>c;
+        cin >> c;
         if(c>='a'&&c<='z'){
             P.insert(c,cursor);
             cursor++;
@@ -24,5 +24,6 @@ int main(){
             P.current_piece = NULL;
             P.state=0;
         }
+        P.view();
     }
 }

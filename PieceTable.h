@@ -9,6 +9,7 @@ class PieceTable {
 public:
     
     int state=0;
+    
     enum BufferType {
         ORIGINAL,
         ADD
@@ -25,11 +26,9 @@ public:
     int nextIndex(int index);
     void view();
     piece* current_piece = NULL;
-    
-private:
     string originalString="";
     string addString="";
-    vector<Piece> Pieces;
+    vector<Piece*> Pieces;    
     
 };
 

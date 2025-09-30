@@ -4,12 +4,13 @@ using namespace std;
 
 void PieceTable::insert(char c, int index) {
     if(state==0){
+        current_piece = new piece;
         current_piece->source = ADD;
         current_piece->start = addString.length();
         current_piece->length = 1;
         int i= nextIndex(index);
         addString.push_back(c);
-        Pieces.insert(Pieces.begin()+i , *current_piece);
+        Pieces.insert(Pieces.begin()+i , current_piece);
         state = 1;
     }
 
@@ -28,13 +29,13 @@ void PieceTable::deletion(int index) {
         if(it == 0) return ;
 
         // else return the address of the previous
-        current_piece = &Pieces[it-1];
+        current_piece = Pieces[it-1];
         
         // skip all the pieces having string length 0 and delete that piece
         while(current_piece->length == 0){
             if( it >= 1) it--;
             else return;
-            current_piece = &Pieces[it-1];
+            current_piece = Pieces[it-1];
             Pieces.erase(Pieces.begin() + it);
         }
         // first encounter of a piece having string and decrement length by one
@@ -43,7 +44,7 @@ void PieceTable::deletion(int index) {
         // check if after deleting the current piece has a string
         if(current_piece->length == 0){
             Pieces.erase(Pieces.begin() + it - 1);
-            if(it -2 >= 0) current_piece = &Pieces[it-2];
+            if(it -2 >= 0) current_piece = Pieces[it-2];
             else current_piece = NULL ;
         }
     }else{
@@ -56,18 +57,18 @@ void PieceTable::deletion(int index) {
         else{
             int it = nextIndex(index);
             if(it == 0)return ;
-            current_piece = &Pieces[it-1];
+            current_piece = Pieces[it-1];
             while(current_piece->length == 0){
                 if( it >= 1) it--;
                 else return;
-                current_piece = &Pieces[it-1];
+                current_piece = Pieces[it-1];
                 Pieces.erase(Pieces.begin() + it);
             }
             current_piece->length--;
             
             if(current_piece->length == 0){
                 Pieces.erase(Pieces.begin() + it - 1);
-                if(it - 2 >= 0) current_piece = &Pieces[it-2];
+                if(it - 2 >= 0) current_piece = Pieces[it-2];
                 else current_piece = NULL ;
             }
         }
@@ -79,16 +80,17 @@ void PieceTable::deletion(int index) {
 
 void PieceTable::view(){
     for(auto it:Pieces){
-        if(it.source==ADD){
-            for(int i=0;i<it.length;i++){
-                cout<<addString[i+it.source];
+        if(it->source==ADD){
+            for(int i=0;i<it->length;i++){
+                cout<<addString[i+it->start];
             }
         }else{
-            for(int i=0;i<it.length;i++){
-                cout<<originalString[i+it.source];
+            for(int i=0;i<it->length;i++){
+                cout<<originalString[i+it->start];
             }
         }
     }
+    cout<<endl;
 }
 
 int PieceTable::nextIndex(int index){
@@ -97,19 +99,19 @@ int PieceTable::nextIndex(int index){
     if(index==0)return 0;
     for(auto &it:Pieces){
         i++;
-        index-=it.length;
+        index-=it->length;
         if(index==0){
             return i;
         }
         if(index<0){
-            int n=it.start;
-            int len=it.length;
-            it.length=originalIndex-n;
+            int n=it->start;
+            int len=it->length;
+            it->length=originalIndex-n;
             piece* newPiece=new piece;
-            newPiece->source=it.source;
+            newPiece->source=it->source;
             newPiece->start=originalIndex;
             newPiece->length=len+n-originalIndex;
-            Pieces.insert(Pieces.begin() + i, *newPiece);
+            Pieces.insert(Pieces.begin() + i, newPiece);
             return i;
         }
     }

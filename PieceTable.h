@@ -23,6 +23,7 @@ public:
     void insert(char c, int index);
     void deletion(int index);
     int nextIndex(int index);
+    void view();
     piece* current_piece = NULL;
     
 private:

@@ -1,4 +1,5 @@
 #include "PieceTable.h"
+#include <bits/stdc++.h>
 using namespace std;
 
 void PieceTable::insert(char c, int index) {

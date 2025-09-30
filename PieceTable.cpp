@@ -1,8 +1,6 @@
 #include "PieceTable.h"
 using namespace std;
 
-using namespace std;
-
 void PieceTable::insert(char c, int index) {
     if(state==0){
         current_piece->source = ADD;

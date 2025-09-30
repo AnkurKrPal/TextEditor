@@ -7,6 +7,8 @@ using namespace std;
 
 class PieceTable {
 public:
+    
+    int state=0;
     enum BufferType {
         ORIGINAL,
         ADD
@@ -21,13 +23,13 @@ public:
     void insert(char c, int index);
     void deletion(int index);
     int nextIndex(int index);
-
+    piece* current_piece = NULL;
+    
 private:
     string originalString;
     string addString;
     vector<Piece> Pieces;
-    int state;
-    piece* current_piece;
+    
 };
 
 #endif

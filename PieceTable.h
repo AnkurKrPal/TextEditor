@@ -25,6 +25,8 @@ public:
     void deletion(int index);
     int nextIndex(int index);
     void view();
+    void start();
+    void end();
     piece* current_piece = NULL;
     string originalString="";
     string addString="";

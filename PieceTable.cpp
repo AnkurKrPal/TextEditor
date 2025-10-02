@@ -117,3 +117,47 @@ int PieceTable::nextIndex(int index){
     }
     return Pieces.size();
 }
+
+void PieceTable::start(){
+    //input from file to string
+    ifstream inFile("org.txt");
+    char ch;
+    while (inFile.get(ch)) {
+        originalString += ch;
+    }
+    inFile.close();
+
+    //clearing the file
+    ofstream outFile("org.txt", ios::out);
+    outFile.close();
+
+    //making a new single piece
+    piece* p = new piece;
+    p->source = ORIGINAL;
+    p->start = 0;
+    p->length = originalString.length();
+    Pieces.push_back(p);
+
+    state=0;
+    current_piece=NULL;
+}
+
+void PieceTable::end(){
+    //traversing through all pieces and storing in file
+    ofstream outFile("org.txt");
+    for (auto it :Pieces) {
+        if (it->source ==ADD) {
+            outFile.write( &addString[it->start] , it->length);
+        } else {
+            outFile.write( &originalString[it->start] , it->length);
+        }
+    }
+    outFile.close();
+
+    //clearing all pieces and string
+    for (auto p : Pieces) delete p;
+    Pieces.clear();
+    originalString.clear();
+    addString.clear();
+
+}

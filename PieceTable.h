@@ -5,30 +5,33 @@
 #include <string>
 using namespace std;
 
-class PieceTable {
-public:
-    
-    int state=0;
-    
-    enum BufferType {
+enum BufferType {
         ORIGINAL,
         ADD
     };
-
-    typedef struct Piece {
+typedef struct pieceNode {
         BufferType source;
         size_t start;
         size_t length;
-    }piece;
+        pieceNode* left;
+        pieceNode* right;
+        int weight;
+        int height;
+}pieceNode;
 
-    void insert(char c, int index);
-    void deletion(int index);
-    int nextIndex(int index);
-    void view();
-    piece* current_piece = NULL;
-    string originalString="";
-    string addString="";
-    vector<Piece*> Pieces;    
+class PieceTable {
+
+    public:
+        
+        int state=0;
+        void insert(char c, int index);
+        void deletion(int index);
+        int nextIndex(int index);
+        void view();
+        piece* current_piece = NULL;
+        string originalString="";
+        string addString="";
+        vector<Piece*> Pieces;    
     
 };
 

@@ -33,13 +33,13 @@ class PieceTable {
     public:
         pieceNode* current_piece = NULL;
         string originalString="";
+        pieceNode* head ;
         string addString="";
-        vector<Piece*> Pieces; 
+        vector<pieceNode*> Pieces; 
         int state=0;
         void insert(char c, int index);
         void deletion(int index);
-        int nextIndex(int index);
-        pieceNode* createInsert(pieceNode* node,char c, int index);
+        pieceNode* createInsert(pieceNode* node,char c, int index, int weightUpdation, int type);
         void view();
            
     

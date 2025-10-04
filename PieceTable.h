@@ -17,6 +17,15 @@ struct pieceNode {
         pieceNode* right;
         int weight;
         int height;
+        pieceNode(BufferType src, size_t s, size_t l){
+            source=src;
+            start=s;
+            length=l;
+            left=NULL;
+            right=NULL;
+            height=1;
+            weight=0;
+        }
 };
 
 class PieceTable {

@@ -1,13 +1,62 @@
 #include "PieceTable.h"
 #include <bits/stdc++.h>
 using namespace std;
-typedef pair<pieceNode*,int> pack;//node,sum of all lengths
+typedef pair<pieceNode *, int> pack; // node,sum of all lengths
+int height(pieceNode *N)
+{
+    if (N == nullptr)
+        return 0;
+    return N->height;
+}
+int getBalance(pieceNode *N)
+{
+    if (N == nullptr)
+        return 0;
+    return height(N->left) - height(N->right);
+}
+pieceNode *rightRotate(pieceNode *y) { 
+    pieceNode *x = y->left; 
+    pieceNode *T2 = x->right; 
+
+    // Perform rotation 
+    x->right = y; 
+    y->left = T2; 
+
+    // Update heights 
+    y->height = 1 + max(height(y->left), 
+                    height(y->right)); 
+    x->height = 1 + max(height(x->left), 
+                        height(x->right)); 
+
+    // Return new root 
+    return x; 
+} 
+
+// A utility function to left rotate 
+// subtree rooted with x 
+pieceNode *leftRotate(pieceNode *x) { 
+    pieceNode *y = x->right; 
+    pieceNode *T2 = y->left; 
+
+    // Perform rotation 
+    y->left = x; 
+    x->right = T2; 
+
+    // Update heights 
+    x->height = 1 + max(height(x->left), 
+                        height(x->right)); 
+    y->height = 1 + max(height(y->left), 
+                        height(y->right)); 
+
+    // Return new root 
+    return y; 
+} 
 void PieceTable::insert(char c, int index)
 {
     if (state == 0)
     {
-        createInsert(c,index);
-        state=1;
+        createInsert(c, index);
+        state = 1;
     }
 
     else if (state == 1)
@@ -16,50 +65,98 @@ void PieceTable::insert(char c, int index)
         addString.push_back(c);
     }
 }
-pack PieceTable::createInsert(pieceNode* node,char c, int index){
-    if(node==NULL){
-        pieceNode* newNode=new pieceNode;
-        current_piece=newNode;
-        current_piece->start=addString.length();
-        current_piece->length=1;
-        addString.push_back(c);
-        return {newNode,1};
+// type(0) : normal single character insertion
+// type(1) : pieceNode part insertion
+pieceNode* PieceTable::createInsert(pieceNode *node, char c, int index, int weightUpdation, int type)
+{
+    if (node == NULL)
+    {
+        pieceNode *newNode = new pieceNode(ADD, addString.length(), weightUpdation);
+        current_piece = newNode;
+        if (type == 0)
+        {
+            addString.push_back(c);
+        }
+        return newNode;
     }
-    pack packet;
-    if(index<= node->weight){
-        packet=createInsert(node->left,c,index);
-        node->left= packet.first;
-    }else if(index>=node->weight+node->length){
-        packet=createInsert(node->right,c, index - node->weight - node->length);
-        node->right= packet.first;
-    }else{
+    if (index <= node->weight)
+    {
+        node->left = createInsert(node->left, c, index, weightUpdation, type);
+        node->weight += weightUpdation;
+    }
+    else if (index >= node->weight + node->length)
+    {
+        node->right = createInsert(node->right, c, index - node->weight - node->length, weightUpdation, type);
+    }
+    else
+    {
 
         //////////////////////////CREATE LEFT CHILD/////////////////////////////
 
-        packet=createInsert(node->left,c,index);
-        node->left= packet.first;
-        current_piece->source=node->source;
-        current_piece->start=node->start;
-        current_piece->length=index-node->weight;
-        current_piece->left=NULL;
-        current_piece->right=NULL;
-        current_piece->height=1;
-        current_piece->weight=0;
+        node->left = createInsert(node->left, c, index, index - node->weight, 1);
+        current_piece->source = node->source;
+        current_piece->start = node->start;
+        current_piece->left = NULL;
+        current_piece->right = NULL;
+        current_piece->height = 1;
+        current_piece->weight = 0;
+
+        node->weight += index - node->weight;
 
         //////////////////////////CREATE RIGHT CHILD////////////////////////////
 
-        packet=createInsert(node->right,c, index - node->weight - node->length);
-        node->right= packet.first;
-        current_piece->source=node->source;
-        current_piece->start=node->start+index-node->weight;
-        current_piece->length=node->length+node->weight-index;
-        current_piece->left=NULL;
-        current_piece->right=NULL;
-        current_piece->height=1;
-        current_piece->weight=0;
+        node->right = createInsert(node->right, c, index - node->weight - node->length, node->length + node->weight - index, 1);
+        current_piece->source = node->source;
+        current_piece->start = node->start + index - node->weight;
+        current_piece->left = NULL;
+        current_piece->right = NULL;
+        current_piece->height = 1;
+        current_piece->weight = 0;
 
-        current_piece=node;
+        current_piece = node;
+        current_piece->start = addString.length();
+        current_piece->length=1;
+        addString.push_back(c);
     }
+    node->height = 1 + max(height(node->left), height(node->right));
+    int balance = getBalance(node);
+
+    /////////conditions need to be confirmed
+
+    // Left Left Case
+    if (balance > 1 && index <= node->left->weight)
+    {
+        pieceNode *toReturn = rightRotate(node);
+        node->weight -= toReturn->weight + toReturn->length;
+        return toReturn
+    }
+    // Right Right Case
+    if (balance < -1 && index > node->right->length + node->right->weight)
+    {
+        pieceNode *toReturn = leftRotate(node);
+        toReturn->weight += node->weight + node->length;
+        return toReturn;
+    }
+    // Left Right Case
+    if (balance > 1 && index > node->left->length + node->left->weight)
+    {
+        node->left = leftRotate(node->left);
+        pieceNode *toReturn = rightRotate(node);
+        toReturn->weight += toReturn->left->weight + toReturn->left->length;
+        node->weight -= toReturn->weight + toReturn->length;
+        return toReturn;
+    }
+
+    // Right Left Case
+    if (balance < -1 && index <= node->right->weight)
+    {
+        node->right = rightRotate(node->right);
+        pieceNode *toReturn = leftRotate(node);
+        toReturn->right->weight -= toReturn->length + toReturn->weight;
+        toReturn->weight += node->length + node->weight;
+        return toReturn;
+    }
+    return node;
 };
 int PieceTable::nextIndex(int index, pieceNode *root)
 {
@@ -76,7 +173,7 @@ int PieceTable::nextIndex(int index, pieceNode *root)
         newPiece->weight = root->weight;
         newPiece->left = root->left;
         newPiece->right = NULL;
-        newPiece->height=1+newPiece->left->height;
+        newPiece->height = 1 + newPiece->left->height;
 
         root->length = root->length + root->weight - index;
         root->start = newPiece->start + newPiece->length;
@@ -208,48 +305,53 @@ void PieceTable::view()
     cout << endl;
 }
 
-
-
-void PieceTable::start(){
-    //input from file to string
+void PieceTable::start()
+{
+    // input from file to string
     ifstream inFile("org.txt");
     char ch;
-    while (inFile.get(ch)) {
+    while (inFile.get(ch))
+    {
         originalString += ch;
     }
     inFile.close();
 
-    //clearing the file
+    // clearing the file
     ofstream outFile("org.txt", ios::out);
     outFile.close();
 
-    //making a new single piece
-    piece* p = new piece;
+    // making a new single piece
+    piece *p = new piece;
     p->source = ORIGINAL;
     p->start = 0;
     p->length = originalString.length();
     Pieces.push_back(p);
 
-    state=0;
-    current_piece=NULL;
+    state = 0;
+    current_piece = NULL;
 }
 
-void PieceTable::end(){
-    //traversing through all pieces and storing in file
+void PieceTable::end()
+{
+    // traversing through all pieces and storing in file
     ofstream outFile("org.txt");
-    for (auto it :Pieces) {
-        if (it->source ==ADD) {
-            outFile.write( &addString[it->start] , it->length);
-        } else {
-            outFile.write( &originalString[it->start] , it->length);
+    for (auto it : Pieces)
+    {
+        if (it->source == ADD)
+        {
+            outFile.write(&addString[it->start], it->length);
+        }
+        else
+        {
+            outFile.write(&originalString[it->start], it->length);
         }
     }
     outFile.close();
 
-    //clearing all pieces and string
-    for (auto p : Pieces) delete p;
+    // clearing all pieces and string
+    for (auto p : Pieces)
+        delete p;
     Pieces.clear();
     originalString.clear();
     addString.clear();
-
 }

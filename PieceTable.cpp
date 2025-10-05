@@ -14,48 +14,50 @@ int getBalance(pieceNode *N)
         return 0;
     return height(N->left) - height(N->right);
 }
-pieceNode *rightRotate(pieceNode *y) { 
-    pieceNode *x = y->left; 
-    pieceNode *T2 = x->right; 
+pieceNode *rightRotate(pieceNode *y)
+{
+    pieceNode *x = y->left;
+    pieceNode *T2 = x->right;
 
-    // Perform rotation 
-    x->right = y; 
-    y->left = T2; 
+    // Perform rotation
+    x->right = y;
+    y->left = T2;
 
-    // Update heights 
-    y->height = 1 + max(height(y->left), 
-                    height(y->right)); 
-    x->height = 1 + max(height(x->left), 
-                        height(x->right)); 
+    // Update heights
+    y->height = 1 + max(height(y->left),
+                        height(y->right));
+    x->height = 1 + max(height(x->left),
+                        height(x->right));
 
-    // Return new root 
-    return x; 
-} 
+    // Return new root
+    return x;
+}
 
-// A utility function to left rotate 
-// subtree rooted with x 
-pieceNode *leftRotate(pieceNode *x) { 
-    pieceNode *y = x->right; 
-    pieceNode *T2 = y->left; 
+// A utility function to left rotate
+// subtree rooted with x
+pieceNode *leftRotate(pieceNode *x)
+{
+    pieceNode *y = x->right;
+    pieceNode *T2 = y->left;
 
-    // Perform rotation 
-    y->left = x; 
-    x->right = T2; 
+    // Perform rotation
+    y->left = x;
+    x->right = T2;
 
-    // Update heights 
-    x->height = 1 + max(height(x->left), 
-                        height(x->right)); 
-    y->height = 1 + max(height(y->left), 
-                        height(y->right)); 
+    // Update heights
+    x->height = 1 + max(height(x->left),
+                        height(x->right));
+    y->height = 1 + max(height(y->left),
+                        height(y->right));
 
-    // Return new root 
-    return y; 
-} 
+    // Return new root
+    return y;
+}
 void PieceTable::insert(char c, int index)
 {
     if (state == 0)
     {
-        createInsert(head , c, index , 1 , 0);
+        createInsert(head, c, index, 1, 0);
         state = 1;
     }
 
@@ -67,7 +69,7 @@ void PieceTable::insert(char c, int index)
 }
 // type(0) : normal single character insertion
 // type(1) : pieceNode part insertion
-pieceNode* PieceTable::createInsert(pieceNode *node, char c, int index, int weightUpdation, int type)
+pieceNode *PieceTable::createInsert(pieceNode *node, char c, int index, int weightUpdation, int type)
 {
     if (node == NULL)
     {
@@ -115,7 +117,7 @@ pieceNode* PieceTable::createInsert(pieceNode *node, char c, int index, int weig
 
         current_piece = node;
         current_piece->start = addString.length();
-        current_piece->length=1;
+        current_piece->length = 1;
         addString.push_back(c);
     }
     node->height = 1 + max(height(node->left), height(node->right));
@@ -158,6 +160,161 @@ pieceNode* PieceTable::createInsert(pieceNode *node, char c, int index, int weig
     }
     return node;
 };
+
+pieceNode *minValueNode(pieceNode *node)
+{
+    pieceNode *current = node;
+    while (current && current->left)
+        current = current->left;
+    return current;
+}
+
+pieceNode *PieceTable::deletion(pieceNode *node, int index, int weightUpdation)
+{
+
+    if (!node) return node;      
+    if (index <= node->weight)
+    {
+        node->left = deletion(node->left, index, weightUpdation);
+        node->weight -= weightUpdation;
+    }
+    else if (index > node->weight + node->length)
+    {
+        node->right = deletion(node->right, index - node->weight - node->length, weightUpdation);
+    }
+    else
+    {
+        current_piece = node;
+        int relativeIndex = index - node->weight;
+
+        if (node->length == 1)
+        {
+            if (node->left == NULL || node->right == NULL)
+            {
+                pieceNode *temp = node->left ? node->left : node->right;
+                delete node;
+                node = temp;
+                current_piece = NULL;
+            }
+            else
+            {
+                pieceNode *successor = minValueNode(node->right);
+                node->source = successor->source;
+                node->start = successor->start;
+                node->length = successor->length;
+                node->right = deletion(node->right, 0, weightUpdation);
+            }
+        }
+        else if (relativeIndex == 1)
+        {
+            node->start++;
+            node->length--;
+        }
+        else if (relativeIndex == node->length)
+        {
+            node->length--;
+        }
+        else
+        {
+            pieceNode *right_part = new pieceNode(node->source, node->start + relativeIndex, node->length - relativeIndex);
+            node->length = relativeIndex - 1;
+
+            if (node->right == NULL)
+            {
+                node->right = right_part;
+            }
+            else
+            {
+                pieceNode *successor_parent = minValueNode(node->right);
+                successor_parent->left = right_part;
+            }
+        }
+    }
+
+    if (node == NULL)
+    {
+        return node;
+    }
+
+    bool retFlag;
+    pieceNode *retVal = balanceFunction(node, index, retFlag);
+    if (retFlag)
+        return retVal;
+    return node;
+}
+
+pieceNode *PieceTable::balanceFunction(pieceNode *node, int index, bool &retFlag)
+{
+    retFlag = true;
+    node->height = 1 + max(height(node->left), height(node->right));
+    int balance = getBalance(node);
+
+    /////////conditions need to be confirmed
+
+    // Left Left Case
+    if (balance > 1 && index <= node->left->weight)
+    {
+        pieceNode *toReturn = rightRotate(node);
+        node->weight -= toReturn->weight + toReturn->length;
+        return toReturn;
+    }
+    // Right Right Case
+    if (balance < -1 && index > node->right->length + node->right->weight)
+    {
+        pieceNode *toReturn = leftRotate(node);
+        toReturn->weight += node->weight + node->length;
+        return toReturn;
+    }
+    // Left Right Case
+    if (balance > 1 && index > node->left->length + node->left->weight)
+    {
+        node->left = leftRotate(node->left);
+        pieceNode *toReturn = rightRotate(node);
+        toReturn->weight += toReturn->left->weight + toReturn->left->length;
+        node->weight -= toReturn->weight + toReturn->length;
+        return toReturn;
+    }
+
+    // Right Left Case
+    if (balance < -1 && index <= node->right->weight)
+    {
+        node->right = rightRotate(node->right);
+        pieceNode *toReturn = leftRotate(node);
+        toReturn->right->weight -= toReturn->length + toReturn->weight;
+        toReturn->weight += node->length + node->weight;
+        return toReturn;
+    }
+    retFlag = false;
+    return node;
+};
+
+int PieceTable::consecutiveBackspace()
+{
+
+    if (current_piece && current_piece->length > 0)
+    {
+        current_piece->length--;
+        if (current_piece->length == 0)
+        {
+            current_piece = NULL;
+        }
+    }
+}
+
+void PieceTable::handleBackSpace(int index)
+{
+
+    if (current_piece != NULL && index == last_cursor_pos - 1 && current_piece->length > 0)
+    {
+        consecutiveBackspace();
+    }
+    else
+    {
+        head = deletion(head, index + 1, 0);
+    }
+    last_cursor_pos = index;
+}
+
 // int PieceTable::nextIndex(int index, pieceNode *root)
 // {
 //     if (index < weight)
@@ -185,25 +342,25 @@ pieceNode* PieceTable::createInsert(pieceNode *node, char c, int index, int weig
 //     {
 //         return nextIndex(index - weight - root->length, root->right);
 //     }
-    // for(auto &it:Pieces){
-    //     i++;
-    //     index-=it->length;
-    //     if(index==0){
-    //         return i;
-    //     }
-    //     if(index<0){
-    //         int n=it->start;
-    //         int len=it->length;
-    //         it->length=originalIndex-n;
-    //         piece* newPiece=new piece;
-    //         newPiece->source=it->source;
-    //         newPiece->start=originalIndex;
-    //         newPiece->length=len+n-originalIndex;
-    //         Pieces.insert(Pieces.begin() + i, newPiece);
-    //         return i;
-    //     }
-    // }
-    // return Pieces.size();
+// for(auto &it:Pieces){
+//     i++;
+//     index-=it->length;
+//     if(index==0){
+//         return i;
+//     }
+//     if(index<0){
+//         int n=it->start;
+//         int len=it->length;
+//         it->length=originalIndex-n;
+//         piece* newPiece=new piece;
+//         newPiece->source=it->source;
+//         newPiece->start=originalIndex;
+//         newPiece->length=len+n-originalIndex;
+//         Pieces.insert(Pieces.begin() + i, newPiece);
+//         return i;
+//     }
+// }
+// return Pieces.size();
 // }
 // void PieceTable::deletion(int index)
 // {

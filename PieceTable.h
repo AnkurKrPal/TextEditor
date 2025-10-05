@@ -5,44 +5,52 @@
 #include <string>
 using namespace std;
 
-enum BufferType {
-        ORIGINAL,
-        ADD
-    };
-struct pieceNode {
-        BufferType source;
-        size_t start;
-        size_t length;
-        pieceNode* left;
-        pieceNode* right;
-        int weight;
-        int height;
-        pieceNode(BufferType src, size_t s, size_t l){
-            source=src;
-            start=s;
-            length=l;
-            left=NULL;
-            right=NULL;
-            height=1;
-            weight=0;
-        }
+enum BufferType
+{
+    ORIGINAL,
+    ADD
+};
+struct pieceNode
+{
+    BufferType source;
+    size_t start;
+    size_t length;
+    pieceNode *left;
+    pieceNode *right;
+    int weight;
+    int height;
+
+    pieceNode(BufferType src, size_t s, size_t l)
+    {
+        source = src;
+        start = s;
+        length = l;
+        left = NULL;
+        right = NULL;
+        height = 1;
+        weight = 0;
+    }
 };
 
-class PieceTable {
+class PieceTable
+{
 
-    public:
-        pieceNode* current_piece = NULL;
-        string originalString="";
-        pieceNode* head ;
-        string addString="";
-        vector<pieceNode*> Pieces; 
-        int state=0;
-        void insert(char c, int index);
-        void deletion(int index);
-        pieceNode* createInsert(pieceNode* node,char c, int index, int weightUpdation, int type);
-        void view();
-           
-    
+public:
+    pieceNode *current_piece = NULL;
+    string originalString = "";
+    pieceNode *head;
+    string addString = "";
+    int state = 0;
+    int last_cursor_pos = -1;
+    vector<pieceNode *> Pieces;
+
+    void insert(char c, int index);
+    pieceNode *deletion(pieceNode *node, int index, int weightUpdation);
+    pieceNode *balanceFunction(pieceNode *node, int index, bool &retFlag);
+    int consecutiveBackspace();
+    void handleBackSpace(int cursor_pos);
+    pieceNode *createInsert(pieceNode *node, char c, int index, int weightUpdation, int type);
+    void view();
 };
 
 #endif

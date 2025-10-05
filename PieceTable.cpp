@@ -314,25 +314,20 @@ pieceNode *PieceTable::balanceFunction(pieceNode *node, int index, bool &retFlag
     return node;
 };
 
-int PieceTable::consecutiveBackspace()
-{
-
-    if (current_piece && current_piece->length > 0)
-    {
-        current_piece->length--;
-        if (current_piece->length == 0)
-        {
-            current_piece = NULL;
-        }
-    }
-}
 
 void PieceTable::handleBackSpace(int index)
 {
 
     if (current_piece != NULL && index == last_cursor_pos - 1 && current_piece->length > 0)
     {
-        consecutiveBackspace();
+        if (current_piece && current_piece->length > 0)
+        {
+            current_piece->length--;
+            if (current_piece->length == 0)
+            {
+                current_piece = NULL;
+            }
+        }
     }
     else
     {

@@ -49,7 +49,6 @@ class PieceTable
         void insert(char c, int index);
         pieceNode *deletion(pieceNode *node, int index, int weightUpdation);
         pieceNode *balanceFunction(pieceNode *node, int index, bool &retFlag);
-        int consecutiveBackspace();
         void handleBackSpace(int cursor_pos);
         pieceNode *createInsert(pieceNode *node, char c, int index, int weightUpdation, int type);
         void view(pieceNode* node);

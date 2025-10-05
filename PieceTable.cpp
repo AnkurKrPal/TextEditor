@@ -127,7 +127,7 @@ pieceNode *PieceTable::createInsert(pieceNode *node, char c, int index, int weig
         current_piece->height = 1;
         current_piece->weight = 0;
 
-        node->weight += index - node->weight;
+        
 
         //////////////////////////CREATE RIGHT CHILD////////////////////////////
 
@@ -138,6 +138,8 @@ pieceNode *PieceTable::createInsert(pieceNode *node, char c, int index, int weig
         current_piece->right = NULL;
         current_piece->height = 1;
         current_piece->weight = 0;
+
+        node->weight += index - node->weight;
 
         current_piece = node;
         current_piece->start = addString.length();

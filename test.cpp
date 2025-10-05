@@ -14,6 +14,7 @@ int main(){
             cursor++;
         }else if(c=='5'){       // backspace
             //P.deletion(cursor);
+            P.deletion(P.head , cursor , 1);
             cursor--;
         }else if(c=='4'){       // left
             cursor--;

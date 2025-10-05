@@ -73,7 +73,7 @@ int PieceTable::weightUpdator(pieceNode* node){
 void PieceTable::insert(char c, int index)
 {
     
-    if (state == 0)
+    if (state != 1)
     {
         
         if(current_piece){
@@ -197,25 +197,25 @@ pieceNode *minValueNode(pieceNode *node)
 
 pieceNode *PieceTable::deletion(pieceNode *node, int index, int weightUpdation)
 {
-    if(state ==2){
+    if(state != 0){
         current_piece->length--;
         if(current_piece->length ==0){
-            if (node->left == NULL || node->right == NULL)
+            if (!node->left || !node->right)
             {
                 pieceNode *temp = node->left ? node->left : node->right;
                 delete node;
-                node = temp;
-                // current_piece = NULL;
-                
+                state = 0;
+                return temp; 
             }
-            else
-            {
-                pieceNode *successor = minValueNode(node->right);
-                node->source = successor->source;
-                node->start = successor->start;
-                node->length = successor->length;
-                node->right = deletion(node->right, 0, weightUpdation);
-            }
+
+            pieceNode *successor = minValueNode(node->right);
+
+            node->source = successor->source;
+            node->start = successor->start;
+            node->length = successor->length;
+
+            node->right = deletion(node->right, 0, weightUpdation);
+           
             state = 0 ;
         }
         return head;
@@ -237,24 +237,24 @@ pieceNode *PieceTable::deletion(pieceNode *node, int index, int weightUpdation)
         current_piece = node;
         int relativeIndex = index - node->weight;
 
-        if (node->length == 1)
-        {
-            if (node->left == NULL || node->right == NULL)
+        if (node->length == 0)
+        {   
+            if (!node->left || !node->right)
             {
                 pieceNode *temp = node->left ? node->left : node->right;
                 delete node;
-                node = temp;
-                // current_piece = NULL;
-                
+                state = 0 ;
+                return temp; 
             }
-            else
-            {
-                pieceNode *successor = minValueNode(node->right);
-                node->source = successor->source;
-                node->start = successor->start;
-                node->length = successor->length;
-                node->right = deletion(node->right, 0, weightUpdation);
-            }
+
+            pieceNode *successor = minValueNode(node->right);
+
+            node->source = successor->source;
+            node->start = successor->start;
+            node->length = successor->length;
+
+            node->right = deletion(node->right, 0, weightUpdation);
+            
             state = 0 ;
         }
         else if (relativeIndex == 1)
@@ -269,7 +269,7 @@ pieceNode *PieceTable::deletion(pieceNode *node, int index, int weightUpdation)
         else
         {
             pieceNode *right_part = new pieceNode(node->source, node->start + relativeIndex, node->length - relativeIndex);
-            node->length = relativeIndex - 1;
+            node->length = relativeIndex -1;
 
             if (node->right == NULL)
             {
@@ -282,11 +282,12 @@ pieceNode *PieceTable::deletion(pieceNode *node, int index, int weightUpdation)
             }
         }
     }
+    state = 2;
 
-    if (node == NULL)
-    {
-        return node;
-    }
+    // if (node == NULL)
+    // {
+    //     return node;
+    // }
 
     bool retFlag;
     pieceNode *retVal = balanceFunction(node, index, retFlag);

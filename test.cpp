@@ -13,17 +13,16 @@ int main(){
             P.insert(c,cursor);
             cursor++;
         }else if(c=='5'){       // backspace
-            P.deletion(cursor);
+            //P.deletion(cursor);
             cursor--;
         }else if(c=='4'){       // left
             cursor--;
-            P.current_piece = NULL;
             P.state=0;
         }else if(c=='6'){       //right
             cursor++;
-            P.current_piece = NULL;
             P.state=0;
         }
-        P.view();
+        P.view(P.head);
+        cout<<endl;
     }
 }

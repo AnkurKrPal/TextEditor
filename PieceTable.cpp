@@ -53,11 +53,34 @@ pieceNode *leftRotate(pieceNode *x)
     // Return new root
     return y;
 }
+
+int PieceTable::weightUpdator(pieceNode* node){
+    if(node==current_piece){
+        return current_piece->length-1;
+    }
+    int weightUpdation;
+    if (currIndex <= node->weight)
+    {
+        weightUpdation = weightUpdator(node->left);
+        node->weight += weightUpdation;
+    }
+    else if (currIndex >= node->weight + node->length)
+    {
+        weightUpdation = weightUpdator(node->right);
+    }
+    return weightUpdation;
+}
 void PieceTable::insert(char c, int index)
 {
+    
     if (state == 0)
     {
-        createInsert(head, c, index, 1, 0);
+        
+        if(current_piece){
+            weightUpdator(head);
+        }
+        currIndex = index ;
+        head = createInsert(head, c, index, 1, 0);
         state = 1;
     }
 
@@ -71,6 +94,7 @@ void PieceTable::insert(char c, int index)
 // type(1) : pieceNode part insertion
 pieceNode *PieceTable::createInsert(pieceNode *node, char c, int index, int weightUpdation, int type)
 {
+    
     if (node == NULL)
     {
         pieceNode *newNode = new pieceNode(ADD, addString.length(), weightUpdation);
@@ -440,26 +464,23 @@ void PieceTable::handleBackSpace(int index)
 //     state = 0;
 // }
 
-void PieceTable::view()
+void PieceTable::view(pieceNode* node)
 {
-    for (auto it : Pieces)
-    {
-        if (it->source == ADD)
-        {
-            for (int i = 0; i < it->length; i++)
-            {
-                cout << addString[i + it->start];
-            }
-        }
-        else
-        {
-            for (int i = 0; i < it->length; i++)
-            {
-                cout << originalString[i + it->start];
-            }
+    if(!node)return ;
+
+    view(node->left);
+    if (node->source == ADD){
+        for (int i = 0; i < node->length; i++){
+            cout << addString[i + node->start];
         }
     }
-    cout << endl;
+    else{
+        for (int i = 0; i < node->length; i++){
+            cout << originalString[i + node->start];
+        }
+    }
+
+    view(node->right);
 }
 
 // void PieceTable::start()

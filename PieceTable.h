@@ -35,22 +35,24 @@ struct pieceNode
 class PieceTable
 {
 
-public:
-    pieceNode *current_piece = NULL;
-    string originalString = "";
-    pieceNode *head;
-    string addString = "";
-    int state = 0;
-    int last_cursor_pos = -1;
-    vector<pieceNode *> Pieces;
+    public:
+        pieceNode *current_piece = NULL;
+        string originalString = "";
+        pieceNode *head=NULL;
+        string addString = "";
+        int state = 0;
+        int last_cursor_pos = -1;
+        vector<pieceNode *> Pieces;
+        int currIndex ;
+        int weightUpdator(pieceNode* node);
 
-    void insert(char c, int index);
-    pieceNode *deletion(pieceNode *node, int index, int weightUpdation);
-    pieceNode *balanceFunction(pieceNode *node, int index, bool &retFlag);
-    int consecutiveBackspace();
-    void handleBackSpace(int cursor_pos);
-    pieceNode *createInsert(pieceNode *node, char c, int index, int weightUpdation, int type);
-    void view();
+        void insert(char c, int index);
+        pieceNode *deletion(pieceNode *node, int index, int weightUpdation);
+        pieceNode *balanceFunction(pieceNode *node, int index, bool &retFlag);
+        int consecutiveBackspace();
+        void handleBackSpace(int cursor_pos);
+        pieceNode *createInsert(pieceNode *node, char c, int index, int weightUpdation, int type);
+        void view(pieceNode* node);
 };
 
 #endif

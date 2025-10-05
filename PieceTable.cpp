@@ -197,7 +197,31 @@ pieceNode *minValueNode(pieceNode *node)
 
 pieceNode *PieceTable::deletion(pieceNode *node, int index, int weightUpdation)
 {
+    if(state ==2){
+        current_piece->length--;
+        if(current_piece->length ==0){
+            if (node->left == NULL || node->right == NULL)
+            {
+                pieceNode *temp = node->left ? node->left : node->right;
+                delete node;
+                node = temp;
+                // current_piece = NULL;
+                
+            }
+            else
+            {
+                pieceNode *successor = minValueNode(node->right);
+                node->source = successor->source;
+                node->start = successor->start;
+                node->length = successor->length;
+                node->right = deletion(node->right, 0, weightUpdation);
+            }
+            state = 0 ;
+        }
+        return head;
+    }
 
+    weightUpdator(head);
     if (!node) return node;      
     if (index <= node->weight)
     {
@@ -220,7 +244,8 @@ pieceNode *PieceTable::deletion(pieceNode *node, int index, int weightUpdation)
                 pieceNode *temp = node->left ? node->left : node->right;
                 delete node;
                 node = temp;
-                current_piece = NULL;
+                // current_piece = NULL;
+                
             }
             else
             {
@@ -230,6 +255,7 @@ pieceNode *PieceTable::deletion(pieceNode *node, int index, int weightUpdation)
                 node->length = successor->length;
                 node->right = deletion(node->right, 0, weightUpdation);
             }
+            state = 0 ;
         }
         else if (relativeIndex == 1)
         {
@@ -315,26 +341,26 @@ pieceNode *PieceTable::balanceFunction(pieceNode *node, int index, bool &retFlag
 };
 
 
-void PieceTable::handleBackSpace(int index)
-{
+// void PieceTable::handleBackSpace(int index)
+// {
 
-    if (current_piece != NULL && index == last_cursor_pos - 1 && current_piece->length > 0)
-    {
-        if (current_piece && current_piece->length > 0)
-        {
-            current_piece->length--;
-            if (current_piece->length == 0)
-            {
-                current_piece = NULL;
-            }
-        }
-    }
-    else
-    {
-        head = deletion(head, index + 1, 0);
-    }
-    last_cursor_pos = index;
-}
+//     if (current_piece != NULL && index == last_cursor_pos - 1 && current_piece->length > 0)
+//     {
+//         if (current_piece && current_piece->length > 0)
+//         {
+//             current_piece->length--;
+//             if (current_piece->length == 0)
+//             {
+//                 current_piece = NULL;
+//             }
+//         }
+//     }
+//     else
+//     {
+//         head = deletion(head, index + 1, 0);
+//     }
+//     last_cursor_pos = index;
+// }
 
 // int PieceTable::nextIndex(int index, pieceNode *root)
 // {

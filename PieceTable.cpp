@@ -70,6 +70,39 @@ int PieceTable::weightUpdator(pieceNode* node){
     }
     return weightUpdation;
 }
+
+int PieceTable::nodeDeletion(pieceNode* node){
+    if(node==current_piece){
+        if(node->left){
+            pieceNode*temp = node->left;
+            while(temp->right){
+                temp = temp->right ;
+            }
+            preNode = temp ;
+        }
+
+        if(node->left){
+            node->source = preNode->source;
+            node->length = preNode->length;
+            node->start = preNode->start;
+            node->weight -= preNode->length;
+        }
+        return current_piece->length-1;
+    }
+    int weightUpdation;
+    if (currIndex <= node->weight)
+    {
+        weightUpdation = weightUpdator(node->left);
+        node->weight += weightUpdation;
+    }
+    else if (currIndex >= node->weight + node->length)
+    {
+        preNode = node ;
+        weightUpdation = weightUpdator(node->right);
+    }
+    return weightUpdation;
+}
+
 void PieceTable::insert(char c, int index)
 {
     

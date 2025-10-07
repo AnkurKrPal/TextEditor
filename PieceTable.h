@@ -45,6 +45,9 @@ class PieceTable
         vector<pieceNode *> Pieces;
         int currIndex ;
         int weightUpdator(pieceNode* node);
+        int nodeDeletion(pieceNode* node);
+        pieceNode* preNode = NULL ;
+        int delCount = 0;
 
         void insert(char c, int index);
         pieceNode *deletion(pieceNode *node, int index, int weightUpdation);
@@ -52,6 +55,7 @@ class PieceTable
         void handleBackSpace(int cursor_pos);
         pieceNode *createInsert(pieceNode *node, char c, int index, int weightUpdation, int type);
         void view(pieceNode* node);
+
 };
 
 #endif

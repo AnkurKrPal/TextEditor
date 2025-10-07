@@ -16,6 +16,7 @@ int main(){
             //P.deletion(cursor);
             P.deletion(P.head , cursor , 1);
             cursor--;
+            P.state=0;
         }else if(c=='4'){       // left
             cursor--;
             P.state=0;

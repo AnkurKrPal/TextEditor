@@ -41,15 +41,15 @@ class PieceTable
         pieceNode *head=NULL;
         string addString = "";
         int state = 0;
-        int last_cursor_pos = -1;
+        int GlobalIndex = 0;
         vector<pieceNode *> Pieces;
         int currIndex ;
         int weightUpdator(pieceNode* node);
-        int nodeDeletion(pieceNode* node);
+        void nodeDeletion(pieceNode* node);
         pieceNode* preNode = NULL ;
         int delCount = 0;
 
-        void PieceTable::weightUpdator2(pieceNode* node)
+        void weightUpdator2(pieceNode* node);
         void insert(char c, int index);
         pieceNode *deletion(pieceNode *node, int index, int weightUpdation);
         pieceNode *balanceFunction(pieceNode *node, int index, bool &retFlag);

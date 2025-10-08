@@ -85,9 +85,10 @@ void PieceTable::weightUpdator2(pieceNode* node){
     }
 }
 void PieceTable::nodeDeletion(pieceNode* node){
+    pieceNode* temp = NULL;
     if(node==current_piece){
         if(node->left){
-            pieceNode*temp = node->left;
+            temp = node->left;
             if(!temp->right){
                 preNode = temp;
             }else{
@@ -97,17 +98,16 @@ void PieceTable::nodeDeletion(pieceNode* node){
                 preNode = temp->right ;
             }
         }
-
+        
         if(node->left){
             node->source = preNode->source;
             node->length = preNode->length;
             node->start = preNode->start;
             node->weight -= preNode->length;
-            node->left = preNode->left;
-
+            pieceNode* t=preNode->left;
             if(preNode == node->left){
                 delete node->left;
-                node->left = NULL;
+                node->left = t;
             }
             else{
                 delete temp->right ;
@@ -136,9 +136,11 @@ void PieceTable::nodeDeletion(pieceNode* node){
             }
             delete node;
             current_piece=preNode;
+            currIndex=GlobalIndex;
         }
-        
+        return;
     }
+
     if (currIndex <= node->weight)
     {
         nodeDeletion(node->left);
@@ -182,6 +184,7 @@ pieceNode *PieceTable::createInsert(pieceNode *node, char c, int index, int weig
     {
         pieceNode *newNode = new pieceNode(ADD, addString.length(), weightUpdation);
         current_piece = newNode;
+        currIndex=GlobalIndex;
         if (type == 0)
         {
             addString.push_back(c);
@@ -225,6 +228,7 @@ pieceNode *PieceTable::createInsert(pieceNode *node, char c, int index, int weig
         node->weight += index - node->weight;
 
         current_piece = node;
+        currIndex=GlobalIndex;
         current_piece->start = addString.length();
         current_piece->length = 1;
         addString.push_back(c);
@@ -303,6 +307,7 @@ pieceNode *PieceTable::deletion(pieceNode *node, int index, int weightUpdation)
     else
     {
         current_piece = node;
+        currIndex=GlobalIndex;
         int relativeIndex = index - node->weight;
 
         // if (node->length == 0)
@@ -428,6 +433,7 @@ void PieceTable::view(pieceNode* node)
             cout << originalString[i + node->start];
         }
     }
+    cout<<endl;
 
     view(node->right);
 }

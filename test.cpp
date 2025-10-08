@@ -12,18 +12,22 @@ int main(){
         if(c>='a'&&c<='z'){
             P.insert(c,cursor);
             cursor++;
+            P.GlobalIndex++;
         }else if(c=='5'){       // backspace
             //P.deletion(cursor);
             if(P.state!=2)P.delCount=0;
             P.delCount++;
+            P.GlobalIndex--;
             P.deletion(P.head , cursor , 1);
             cursor--;
         }else if(c=='4'){       // left
             cursor--;
+            P.GlobalIndex--;
             if(P.delCount>0){P.weightUpdator2(P.head);P.delCount=0;}
             P.state=0;
         }else if(c=='6'){       //right
             cursor++;
+            P.GlobalIndex++;
             if(P.delCount>0){P.weightUpdator2(P.head);P.delCount=0;}
             P.state=0;
         }

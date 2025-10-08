@@ -70,15 +70,32 @@ int PieceTable::weightUpdator(pieceNode* node){
     }
     return weightUpdation;
 }
-
-int PieceTable::nodeDeletion(pieceNode* node){
+void PieceTable::weightUpdator2(pieceNode* node){
+    if(node==current_piece){
+        return;
+    }
+    if (currIndex <= node->weight)
+    {
+        weightUpdator(node->left);
+        node->weight -= delCount;
+    }
+    else if (currIndex >= node->weight + node->length)
+    {
+        weightUpdator(node->right);
+    }
+}
+void PieceTable::nodeDeletion(pieceNode* node){
     if(node==current_piece){
         if(node->left){
             pieceNode*temp = node->left;
-            while(temp->right){
-                temp = temp->right ;
+            if(!temp->right){
+                preNode = temp;
+            }else{
+                while(temp->right->right){
+                    temp = temp->right ;
+                }
+                preNode = temp->right ;
             }
-            preNode = temp ;
         }
 
         if(node->left){
@@ -86,26 +103,59 @@ int PieceTable::nodeDeletion(pieceNode* node){
             node->length = preNode->length;
             node->start = preNode->start;
             node->weight -= preNode->length;
+            node->left = preNode->left;
+
+            if(preNode == node->left){
+                delete node->left;
+                node->left = NULL;
+            }
+            else{
+                delete temp->right ;
+                temp->right = NULL;
+            }
+
+        }else if(node->right){
+            node->source = node->right->source;
+            node->length = node->right->length;
+            node->start = node->right->start;
+            node->weight = node->right->weight;
+            node->height = node->right->height;
+            node->left=node->right->left;
+            pieceNode*temp=node->right->right;
+            delete node->right;
+            node->right=temp;
+        }else{
+            if(preNode->right==node){
+                preNode->right=NULL;
+            }else{
+                pieceNode* curr=preNode->right;
+                while(curr->left!=node){
+                    curr=curr->left;
+                }
+                curr->left=NULL;
+            }
+            delete node;
+            current_piece=preNode;
         }
-        return current_piece->length-1;
+        
     }
-    int weightUpdation;
     if (currIndex <= node->weight)
     {
-        weightUpdation = weightUpdator(node->left);
-        node->weight += weightUpdation;
+        nodeDeletion(node->left);
+        node->weight -= delCount;
     }
     else if (currIndex >= node->weight + node->length)
     {
         preNode = node ;
-        weightUpdation = weightUpdator(node->right);
+        nodeDeletion(node->right);
     }
-    return weightUpdation;
 }
 
 void PieceTable::insert(char c, int index)
 {
-    
+    if(state!=1 && current_piece){
+
+    }
     if (state != 1)
     {
         
@@ -220,49 +270,34 @@ pieceNode *PieceTable::createInsert(pieceNode *node, char c, int index, int weig
     return node;
 };
 
-pieceNode *minValueNode(pieceNode *node)
+pieceNode *minValueNode(pieceNode *node, int weightUp)
 {
     pieceNode *current = node;
-    while (current && current->left)
+    while (current && current->left){
+        current->weight+=weightUp;
         current = current->left;
+    }
     return current;
 }
 
 pieceNode *PieceTable::deletion(pieceNode *node, int index, int weightUpdation)
-{
-    if(state != 0){
+{   if(state==1){
+        weightUpdator(head);
+        state=2;
+    }
+    if(state == 2){
         current_piece->length--;
         if(current_piece->length ==0){
-            if (!node->left || !node->right)
-            {
-                pieceNode *temp = node->left ? node->left : node->right;
-                delete node;
-                state = 0;
-                return temp; 
-            }
-
-            pieceNode *successor = minValueNode(node->right);
-
-            node->source = successor->source;
-            node->start = successor->start;
-            node->length = successor->length;
-
-            node->right = deletion(node->right, 0, weightUpdation);
-           
-            state = 0 ;
+            nodeDeletion(head);
+            delCount=0;
         }
-        return head;
+        return node;
     }
-
-    weightUpdator(head);
-    if (!node) return node;      
-    if (index <= node->weight)
-    {
+    if (!node) return NULL;      
+    if (index <= node->weight){
         node->left = deletion(node->left, index, weightUpdation);
-        node->weight -= weightUpdation;
     }
-    else if (index > node->weight + node->length)
-    {
+    else if (index > node->weight + node->length){
         node->right = deletion(node->right, index - node->weight - node->length, weightUpdation);
     }
     else
@@ -270,49 +305,53 @@ pieceNode *PieceTable::deletion(pieceNode *node, int index, int weightUpdation)
         current_piece = node;
         int relativeIndex = index - node->weight;
 
-        if (node->length == 0)
-        {   
-            if (!node->left || !node->right)
-            {
-                pieceNode *temp = node->left ? node->left : node->right;
-                delete node;
-                state = 0 ;
-                return temp; 
-            }
+        // if (node->length == 0)
+        // {   
+        //     if (!node->left || !node->right)
+        //     {
+        //         pieceNode *temp = node->left ? node->left : node->right;
+        //         delete node;
+        //         state = 0 ;
+        //         return temp; 
+        //     }
 
-            pieceNode *successor = minValueNode(node->right);
+        //     pieceNode *successor = minValueNode(node->right);
 
-            node->source = successor->source;
-            node->start = successor->start;
-            node->length = successor->length;
+        //     node->source = successor->source;
+        //     node->start = successor->start;
+        //     node->length = successor->length;
 
-            node->right = deletion(node->right, 0, weightUpdation);
+        //     node->right = deletion(node->right, 0, weightUpdation);
             
-            state = 0 ;
-        }
-        else if (relativeIndex == 1)
+        //     state = 0 ;
+        // }
+        if (relativeIndex == 1)
         {
             node->start++;
             node->length--;
+            if(node->length==0) nodeDeletion(head);
+           
         }
         else if (relativeIndex == node->length)
         {
             node->length--;
+            
         }
         else
         {
             pieceNode *right_part = new pieceNode(node->source, node->start + relativeIndex, node->length - relativeIndex);
-            node->length = relativeIndex -1;
-
+            
             if (node->right == NULL)
             {
                 node->right = right_part;
             }
             else
             {
-                pieceNode *successor_parent = minValueNode(node->right);
+                pieceNode *successor_parent = minValueNode(node->right, node->length - relativeIndex);
                 successor_parent->left = right_part;
             }
+            
+            node->length = relativeIndex -1;
         }
     }
     state = 2;
@@ -375,156 +414,9 @@ pieceNode *PieceTable::balanceFunction(pieceNode *node, int index, bool &retFlag
 };
 
 
-// void PieceTable::handleBackSpace(int index)
-// {
-
-//     if (current_piece != NULL && index == last_cursor_pos - 1 && current_piece->length > 0)
-//     {
-//         if (current_piece && current_piece->length > 0)
-//         {
-//             current_piece->length--;
-//             if (current_piece->length == 0)
-//             {
-//                 current_piece = NULL;
-//             }
-//         }
-//     }
-//     else
-//     {
-//         head = deletion(head, index + 1, 0);
-//     }
-//     last_cursor_pos = index;
-// }
-
-// int PieceTable::nextIndex(int index, pieceNode *root)
-// {
-//     if (index < weight)
-//     {
-//         return nextIndex(index, root->left);
-//     }
-//     else if (index < weight + root->length)
-//     {
-//         pieceNode *newPiece = new pieceNode;
-//         newPiece->source = root->source;
-//         newPiece->start = root->start;
-//         newPiece->length = index - root->weight;
-//         newPiece->weight = root->weight;
-//         newPiece->left = root->left;
-//         newPiece->right = NULL;
-//         newPiece->height = 1 + newPiece->left->height;
-
-//         root->length = root->length + root->weight - index;
-//         root->start = newPiece->start + newPiece->length;
-//         root->left = newPiece;
-//         root->weight += newPiece->length;
-//         root->
-//     }
-//     else
-//     {
-//         return nextIndex(index - weight - root->length, root->right);
-//     }
-// for(auto &it:Pieces){
-//     i++;
-//     index-=it->length;
-//     if(index==0){
-//         return i;
-//     }
-//     if(index<0){
-//         int n=it->start;
-//         int len=it->length;
-//         it->length=originalIndex-n;
-//         piece* newPiece=new piece;
-//         newPiece->source=it->source;
-//         newPiece->start=originalIndex;
-//         newPiece->length=len+n-originalIndex;
-//         Pieces.insert(Pieces.begin() + i, newPiece);
-//         return i;
-//     }
-// }
-// return Pieces.size();
-// }
-// void PieceTable::deletion(int index)
-// {
-//     // for first backspace execute if or execute else for more than once back to back
-//     if (current_piece == NULL)
-//     {
-//         int it = nextIndex(index);
-
-//         // if the cursor is at the first index of the first piece, then backspace isn't allowed
-//         if (it == 0)
-//             return;
-
-//         // else return the address of the previous
-//         current_piece = Pieces[it - 1];
-
-//         // skip all the pieces having string length 0 and delete that piece
-//         while (current_piece->length == 0)
-//         {
-//             if (it >= 1)
-//                 it--;
-//             else
-//                 return;
-//             current_piece = Pieces[it - 1];
-//             Pieces.erase(Pieces.begin() + it);
-//         }
-//         // first encounter of a piece having string and decrement length by one
-//         current_piece->length--;
-
-//         // check if after deleting the current piece has a string
-//         if (current_piece->length == 0)
-//         {
-//             Pieces.erase(Pieces.begin() + it - 1);
-//             if (it - 2 >= 0)
-//                 current_piece = Pieces[it - 2];
-//             else
-//                 current_piece = NULL;
-//         }
-//     }
-//     else
-//     {
-//         /*
-//             This block executes after more than once backspace one after the other
-//             if block will execute till the string has more than 1 character
-//             else block will execute so as to delete the block and check again for valid pieces having string
-//         */
-//         if (current_piece->length > 1)
-//             current_piece->length--;
-//         else
-//         {
-//             int it = nextIndex(index);
-//             if (it == 0)
-//                 return;
-//             current_piece = Pieces[it - 1];
-//             while (current_piece->length == 0)
-//             {
-//                 if (it >= 1)
-//                     it--;
-//                 else
-//                     return;
-//                 current_piece = Pieces[it - 1];
-//                 Pieces.erase(Pieces.begin() + it);
-//             }
-//             current_piece->length--;
-
-//             if (current_piece->length == 0)
-//             {
-//                 Pieces.erase(Pieces.begin() + it - 1);
-//                 if (it - 2 >= 0)
-//                     current_piece = Pieces[it - 2];
-//                 else
-//                     current_piece = NULL;
-//             }
-//         }
-//     }
-
-//     // set state to 0 so as to activate the block for creating new piece
-//     state = 0;
-// }
-
 void PieceTable::view(pieceNode* node)
 {
     if(!node)return ;
-
     view(node->left);
     if (node->source == ADD){
         for (int i = 0; i < node->length; i++){
@@ -540,53 +432,3 @@ void PieceTable::view(pieceNode* node)
     view(node->right);
 }
 
-// void PieceTable::start()
-// {
-//     // input from file to string
-//     ifstream inFile("org.txt");
-//     char ch;
-//     while (inFile.get(ch))
-//     {
-//         originalString += ch;
-//     }
-//     inFile.close();
-
-//     // clearing the file
-//     ofstream outFile("org.txt", ios::out);
-//     outFile.close();
-
-//     // making a new single piece
-//     piece *p = new piece;
-//     p->source = ORIGINAL;
-//     p->start = 0;
-//     p->length = originalString.length();
-//     Pieces.push_back(p);
-
-//     state = 0;
-//     current_piece = NULL;
-// }
-
-// void PieceTable::end()
-// {
-//     // traversing through all pieces and storing in file
-//     ofstream outFile("org.txt");
-//     for (auto it : Pieces)
-//     {
-//         if (it->source == ADD)
-//         {
-//             outFile.write(&addString[it->start], it->length);
-//         }
-//         else
-//         {
-//             outFile.write(&originalString[it->start], it->length);
-//         }
-//     }
-//     outFile.close();
-
-//     // clearing all pieces and string
-//     for (auto p : Pieces)
-//         delete p;
-//     Pieces.clear();
-//     originalString.clear();
-//     addString.clear();
-// }

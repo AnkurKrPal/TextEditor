@@ -49,6 +49,7 @@ class PieceTable
         pieceNode* preNode = NULL ;
         int delCount = 0;
 
+        void PieceTable::weightUpdator2(pieceNode* node)
         void insert(char c, int index);
         pieceNode *deletion(pieceNode *node, int index, int weightUpdation);
         pieceNode *balanceFunction(pieceNode *node, int index, bool &retFlag);

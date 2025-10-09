@@ -17,7 +17,6 @@ int main(){
             //P.deletion(cursor);
             if(P.state!=2)P.delCount=0;
             P.delCount++;
-            P.GlobalIndex--;
             P.deletion(P.head , cursor , 1);
             cursor--;
         }else if(c=='4'){       // left
@@ -32,6 +31,7 @@ int main(){
             P.state=0;
         }
         P.view(P.head);
+        cout<<" | state : "<<P.state<<" | currIndex : "<<endl;
         cout<<endl;
     }
 }

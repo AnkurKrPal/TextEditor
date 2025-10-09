@@ -32,9 +32,6 @@ pieceNode *rightRotate(pieceNode *y)
     // Return new root
     return x;
 }
-
-// A utility function to left rotate
-// subtree rooted with x
 pieceNode *leftRotate(pieceNode *x)
 {
     pieceNode *y = x->right;
@@ -53,7 +50,6 @@ pieceNode *leftRotate(pieceNode *x)
     // Return new root
     return y;
 }
-
 int PieceTable::weightUpdator(pieceNode* node){
     if(node==current_piece){
         return current_piece->length-1;
@@ -124,7 +120,7 @@ void PieceTable::nodeDeletion(pieceNode* node){
             pieceNode*temp=node->right->right;
             delete node->right;
             node->right=temp;
-        }else{
+        }else if(preNode){
             if(preNode->right==node){
                 preNode->right=NULL;
             }else{
@@ -137,30 +133,34 @@ void PieceTable::nodeDeletion(pieceNode* node){
             delete node;
             current_piece=preNode;
             currIndex=GlobalIndex;
+        }else{
+            if(previousNode){
+               previousNode->left=NULL; 
+               delete node;
+               current_piece=NULL;
+               currIndex=0;
+            }
+            state=0;
         }
         return;
     }
 
     if (currIndex <= node->weight)
     {
+        previousNode=node;
         nodeDeletion(node->left);
         node->weight -= delCount;
     }
     else if (currIndex >= node->weight + node->length)
     {
         preNode = node ;
+        previousNode=node;
         nodeDeletion(node->right);
     }
 }
 
-void PieceTable::insert(char c, int index)
-{
-    if(state!=1 && current_piece){
-
-    }
-    if (state != 1)
-    {
-        
+void PieceTable::insert(char c, int index){
+    if (state != 1){     
         if(current_piece){
             weightUpdator(head);
         }
@@ -291,6 +291,7 @@ pieceNode *PieceTable::deletion(pieceNode *node, int index, int weightUpdation)
     }
     if(state == 2){
         current_piece->length--;
+        GlobalIndex--;
         if(current_piece->length ==0){
             nodeDeletion(head);
             delCount=0;
@@ -302,6 +303,7 @@ pieceNode *PieceTable::deletion(pieceNode *node, int index, int weightUpdation)
         node->left = deletion(node->left, index, weightUpdation);
     }
     else if (index > node->weight + node->length){
+        preNode = node ;
         node->right = deletion(node->right, index - node->weight - node->length, weightUpdation);
     }
     else
@@ -334,13 +336,25 @@ pieceNode *PieceTable::deletion(pieceNode *node, int index, int weightUpdation)
         {
             node->start++;
             node->length--;
+            GlobalIndex--;
             if(node->length==0) nodeDeletion(head);
-           
+            else{
+                if(node->left){
+                    pieceNode* temp = node->left;
+                    while(temp->right){
+                        temp = temp->right ;
+                    }
+                    preNode = temp ;
+                }
+                current_piece=preNode;
+                currIndex=GlobalIndex;
+                preNode=NULL;
+            }
         }
         else if (relativeIndex == node->length)
         {
             node->length--;
-            
+            GlobalIndex--;
         }
         else
         {
@@ -357,6 +371,7 @@ pieceNode *PieceTable::deletion(pieceNode *node, int index, int weightUpdation)
             }
             
             node->length = relativeIndex -1;
+            GlobalIndex--;
         }
     }
     state = 2;
@@ -417,12 +432,8 @@ pieceNode *PieceTable::balanceFunction(pieceNode *node, int index, bool &retFlag
     retFlag = false;
     return node;
 };
-
-
-void PieceTable::view(pieceNode* node)
-{
-    if(!node)return ;
-    view(node->left);
+void PieceTable::printNode(pieceNode* node){
+    if(!node){cout<<"NULL";return;}
     if (node->source == ADD){
         for (int i = 0; i < node->length; i++){
             cout << addString[i + node->start];
@@ -433,7 +444,18 @@ void PieceTable::view(pieceNode* node)
             cout << originalString[i + node->start];
         }
     }
-    cout<<endl;
+}
+
+void PieceTable::view(pieceNode* node)
+{
+    if(!node)return ;
+    view(node->left);
+    printNode(node);
+    cout<<"  Left :  ";
+    printNode(node->left);
+    cout<<"  Right :  ";
+    printNode(node->right);
+    cout<<" | weight : "<<node->weight<<endl;
 
     view(node->right);
 }

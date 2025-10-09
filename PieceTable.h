@@ -47,8 +47,10 @@ class PieceTable
         int weightUpdator(pieceNode* node);
         void nodeDeletion(pieceNode* node);
         pieceNode* preNode = NULL ;
+        pieceNode* previousNode = NULL ;
         int delCount = 0;
 
+        void printNode(pieceNode* node);
         void weightUpdator2(pieceNode* node);
         void insert(char c, int index);
         pieceNode *deletion(pieceNode *node, int index, int weightUpdation);

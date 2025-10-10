@@ -42,20 +42,18 @@ class PieceTable
         string addString = "";
         int state = 0;
         int GlobalIndex = 0;
-        vector<pieceNode *> Pieces;
         int currIndex ;
-        int weightUpdator(pieceNode* node);
-        void nodeDeletion(pieceNode* node);
-        pieceNode* preNode = NULL ;
-        pieceNode* previousNode = NULL ;
         int delCount = 0;
 
+        int weightUpdator(pieceNode* node, int index);
+        void AVLDeletion(pieceNode* node, int index);
+        void predecessor(pieceNode* node, pieceNode* &t, int i);
         void printNode(pieceNode* node);
-        void weightUpdator2(pieceNode* node);
+        void weightUpdator2(pieceNode* node, int index);
         void insert(char c, int index);
-        pieceNode *deletion(pieceNode *node, int index, int weightUpdation);
-        pieceNode *balanceFunction(pieceNode *node, int index, bool &retFlag);
-        void handleBackSpace(int cursor_pos);
+        pieceNode *deletion(int index);
+        pieceNode* newDeletion(pieceNode *node, int index);
+        pieceNode *balanceFunction(pieceNode *node, int index);
         pieceNode *createInsert(pieceNode *node, char c, int index, int weightUpdation, int type);
         void view(pieceNode* node);
 

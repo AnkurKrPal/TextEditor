@@ -31,7 +31,7 @@ int main(){
             P.state=0;
         }
         P.view(P.head);
-        cout<<" | state : "<<P.state<<" | currIndex : "<<endl;
+        cout<<" | state : "<<P.state<<" | currIndex : "<<P.currIndex<<endl;
         cout<<endl;
     }
 }

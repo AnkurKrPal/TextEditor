@@ -46,12 +46,12 @@ class PieceTable
         int delCount = 0;
 
         int weightUpdator(pieceNode* node, int index);
-        void AVLDeletion(pieceNode* node, int index);
+        pieceNode * AVLDeletion(pieceNode* node, int index);
         void predecessor(pieceNode* node, pieceNode* &t, int i);
         void printNode(pieceNode* node);
         void weightUpdator2(pieceNode* node, int index);
         void insert(char c, int index);
-        pieceNode *deletion(int index);
+        void deletion(int index);
         pieceNode* newDeletion(pieceNode *node, int index);
         pieceNode *balanceFunction(pieceNode *node, int index);
         pieceNode *createInsert(pieceNode *node, char c, int index, int weightUpdation, int type);

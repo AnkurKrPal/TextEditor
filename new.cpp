@@ -55,12 +55,12 @@ int PieceTable::weightUpdator(pieceNode* node, int index){
         return current_piece->length-1;
     }
     int weightUpdation;
-    if (currIndex <= node->weight)
+    if (index <= node->weight)
     {
         weightUpdation = weightUpdator(node->left, index);
         node->weight += weightUpdation;
     }
-    else if (currIndex >= node->weight + node->length)
+    else if (index >= node->weight + node->length)
     {
         weightUpdation = weightUpdator(node->right, index-node->weight-node->length);
     }
@@ -70,19 +70,21 @@ void PieceTable::weightUpdator2(pieceNode* node, int index){
     if(delCount==0||node==current_piece){
         return;
     }
-    if (currIndex <= node->weight)
+    if (index <= node->weight)
     {
         weightUpdator2(node->left,index);
         node->weight -= delCount;
     }
-    else if (currIndex >= node->weight + node->length)
+    else if (index >= node->weight + node->length)
     {
         weightUpdator2(node->right, index-node->weight-node->length);
     }
 }
 void PieceTable::insert(char c, int index){
-    if (state != 1){     
-        if(current_piece){
+    if (state != 1){   
+        if(delCount>0){
+            weightUpdator2(head,index);
+        }else if(current_piece){
             weightUpdator(head,index);
         }
         currIndex = index ;
@@ -93,6 +95,7 @@ void PieceTable::insert(char c, int index){
     else if (state == 1)
     {
         current_piece->length++;
+        GlobalIndex++;
         addString.push_back(c);
     }
 }
@@ -103,6 +106,7 @@ pieceNode *PieceTable::createInsert(pieceNode *node, char c, int index, int weig
     {
         pieceNode *newNode = new pieceNode(ADD, addString.length(), weightUpdation);
         current_piece = newNode;
+        GlobalIndex++;
         currIndex=GlobalIndex;
         if (type == 0)
         {
@@ -160,6 +164,7 @@ pieceNode *PieceTable::createInsert(pieceNode *node, char c, int index, int weig
    return balanceFunction(node, index);
 };
 void PieceTable::predecessor(pieceNode* node, pieceNode* &t, int i){
+    if (i < 0) return;
     if(node==current_piece){
         if(node->left){
             node=node->left;
@@ -190,7 +195,7 @@ void PieceTable::deletion(int index){
         if(current_piece->length ==0){
             pieceNode* temp;
             predecessor(head,temp,currIndex-1);
-            head=AVLDeletion(head,index-1,0);
+            head=AVLDeletion(head,index-1);
             current_piece=temp;
             currIndex=GlobalIndex;
             delCount=0;
@@ -203,10 +208,10 @@ void PieceTable::deletion(int index){
 pieceNode* PieceTable::newDeletion(pieceNode* node, int index){
     if (!node) return NULL;      
     if (index <= node->weight){
-        node->left = deletion(node->left, index);
+        node->left = newDeletion(node->left, index);
     }
     else if (index > node->weight + node->length){
-        node->right = deletion(node->right, index - node->weight - node->length);
+        node->right = newDeletion(node->right, index - node->weight - node->length);
     }else if(index == node->weight + node->length){
         current_piece=node;
         current_piece->length--;
@@ -244,11 +249,10 @@ pieceNode* PieceTable::newDeletion(pieceNode* node, int index){
     }
     return balanceFunction(node, index);
 }
-pieceNode *minValueNode(pieceNode *node, int weightUp)
+pieceNode *minValueNode(pieceNode *node)
 {
     pieceNode *current = node;
-    while (current && current->left){
-        current->weight+=weightUp;
+    while (current->left){
         current = current->left;
     }
     return current;
@@ -267,7 +271,7 @@ pieceNode *PieceTable::AVLDeletion(pieceNode *node, int index){
     {
         if ((node->left == nullptr) || 
             (node->right == nullptr)) {
-            Node *temp = node->left ? 
+            pieceNode *temp = node->left ? 
                          node->left : node->right;
 
             // No child case
@@ -282,7 +286,7 @@ pieceNode *PieceTable::AVLDeletion(pieceNode *node, int index){
             // node with two children: Get the 
             // inorder successor (smallest in 
             // the right subtree)
-            Node* temp = minValueNode(node->right);
+            pieceNode* temp = minValueNode(node->right);
 
             // Copy the inorder successor's 
             // data to this node

@@ -132,7 +132,7 @@ int PieceTable::predecessor(pieceNode* node, pieceNode* &t, int i){
     {   
         cout<<"calling predessor left for index "<<i<<endl;
         int k=predecessor(node->left,t,i);
-        if(k==0)node->weight-=delCount;
+        if(k==0){node->weight-=delCount;cout<<"reducing weight of "<<node<<" in pred by "<<delCount<<endl;}
         return k;
     }
     else if (i >= node->weight + node->length)
@@ -155,11 +155,14 @@ void PieceTable::deletion(int index){
         //GlobalIndex--;
         //currIndex--;
         if(current_piece->length ==1){
-            pieceNode* temp;
+            pieceNode* temp=NULL;
+            int tempCount=delCount;
+            delCount=0;
             predecessor(head,temp,currIndex);
             current_piece->length--;
             GlobalIndex--;
             currIndex=GlobalIndex;
+            delCount=tempCount;
             head=AVLDeletion(head,index-1);
             current_piece=temp;
             delCount=0;
@@ -186,7 +189,7 @@ pieceNode* PieceTable::newDeletion(pieceNode* node, int index){
         cout<<"hiiiiii"<<endl;
         current_piece=node;
         if(current_piece->length ==1){
-            pieceNode* temp;
+            pieceNode* temp=NULL;
             predecessor(head,temp,currIndex);
             current_piece->length--;
             GlobalIndex--;
@@ -220,7 +223,7 @@ pieceNode* PieceTable::newDeletion(pieceNode* node, int index){
         view(head);
         if(current_piece->length ==0){
             cout<<"biiiiiiiiiii"<<currIndex<<endl;
-            pieceNode* temp;
+            pieceNode* temp=NULL;
             predecessor(head,temp,currIndex);
             cout<<"temp is "<<temp<<endl;
 
@@ -283,6 +286,7 @@ pieceNode *PieceTable::AVLDeletion(pieceNode *node, int index, pieceNode* type){
     }     
     else if (index <= node->weight){
         node->weight-=delCount;
+        cout<<"reducing weight of "<<node<<" in AVL del by "<<delCount<<endl;
         node->left = AVLDeletion(node->left, index, type);
     }
     else if (index >= node->weight + node->length){

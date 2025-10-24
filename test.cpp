@@ -22,22 +22,28 @@ int main(){
         }else if(c=='4'){       // left
             cursor--;
             P.GlobalIndex--;
-            if(P.delCount>0){P.weightUpdator2(P.head,P.currIndex);P.delCount=0;}
+            if(P.state==2){P.weightUpdator2(P.head,P.currIndex);P.delCount=0;P.current_piece=NULL;}
             if(P.state==1){
                 P.weightUpdator(P.head , P.currIndex);
+                P.current_piece=NULL;
             }
             P.state=0;
         }else if(c=='6'){       //right
             cursor++;
             P.GlobalIndex++;
-            if(P.delCount>0){P.weightUpdator2(P.head,P.currIndex);P.delCount=0;}
+            if(P.state==2){P.weightUpdator2(P.head,P.currIndex);P.delCount=0;P.current_piece=NULL;}
             if(P.state==1){
                 P.weightUpdator(P.head , P.currIndex);
+                P.current_piece=NULL;
             }
             P.state=0;
         }
         P.view(P.head);
-        cout<<" | state : "<<P.state<<" | currIndex : "<<P.currIndex<<endl;
+        cout<<"Current Piece : ";
+        P.printNode(P.current_piece);
+        cout<<"  Head : ";
+        P.printNode(P.head);
+        cout<<" | state : "<<P.state<<" | currIndex : "<<P.currIndex<<"  |  GlobalIndex : "<<P.GlobalIndex<<"  |  delCount : "<<P.delCount<<endl;
         cout<<endl;
     }
 }

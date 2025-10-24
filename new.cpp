@@ -1,55 +1,6 @@
 #include "PieceTable.h"
 #include <bits/stdc++.h>
 using namespace std;
-
-int height(pieceNode *N)
-{
-    if (N == nullptr)
-        return 0;
-    return N->height;
-}
-int getBalance(pieceNode *N)
-{
-    if (N == nullptr)
-        return 0;
-    return height(N->left) - height(N->right);
-}
-pieceNode *rightRotate(pieceNode *y)
-{
-    pieceNode *x = y->left;
-    pieceNode *T2 = x->right;
-
-    // Perform rotation
-    x->right = y;
-    y->left = T2;
-
-    // Update heights
-    y->height = 1 + max(height(y->left),
-                        height(y->right));
-    x->height = 1 + max(height(x->left),
-                        height(x->right));
-
-    // Return new root
-    return x;
-}
-pieceNode *leftRotate(pieceNode *x)
-{
-    pieceNode *y = x->right;
-    pieceNode *T2 = y->left;
-
-    // Perform rotation
-    y->left = x;
-    x->right = T2;
-
-    // Update heights
-    x->height = 1 + max(height(x->left),
-                        height(x->right));
-    y->height = 1 + max(height(y->left),
-                        height(y->right));
-
-    // Return new root
-    return y;
-}
 int PieceTable::weightUpdator(pieceNode* node, int index){
     if(node==current_piece){
         return current_piece->length-1;
@@ -82,12 +33,17 @@ void PieceTable::weightUpdator2(pieceNode* node, int index){
 }
 void PieceTable::insert(char c, int index){
     if (state != 1){   
+        
         if(delCount>0){
             weightUpdator2(head,index);
+            delCount=0;
         }else if(current_piece){
+            cout<<"namaste"<<endl;
             weightUpdator(head,index);
         }
+        
         currIndex = index ;
+        GlobalIndex++;
         head = createInsert(head, c, index, 1, 0);
         state = 1;
     }
@@ -106,7 +62,6 @@ pieceNode *PieceTable::createInsert(pieceNode *node, char c, int index, int weig
     {
         pieceNode *newNode = new pieceNode(ADD, addString.length(), weightUpdation);
         current_piece = newNode;
-        GlobalIndex++;
         currIndex=GlobalIndex;
         if (type == 0)
         {
@@ -156,33 +111,39 @@ pieceNode *PieceTable::createInsert(pieceNode *node, char c, int index, int weig
         current_piece->length = 1;
         addString.push_back(c);
     }
-    node->height = 1 + max(height(node->left), height(node->right));
-    int balance = getBalance(node);
 
-    /////////conditions need to be confirmed
 
    return balanceFunction(node, index);
 };
-void PieceTable::predecessor(pieceNode* node, pieceNode* &t, int i){
-    if (i < 0) return;
+int PieceTable::predecessor(pieceNode* node, pieceNode* &t, int i){
+    cout<<"pred called for "<<node<<" at index "<<i<<" for current piece "<<current_piece<<endl;
+    if (i < 0) return 1;
     if(node==current_piece){
+        int k=0;
         if(node->left){
+            k=1;
             node=node->left;
             while(node->right)node=node->right;
             t=node;
         }
+        return k;
         
-    }else if (currIndex <= node->weight)
+    }else if (i <= node->weight)
     {   
-        
-        predecessor(node->left,t,i);
+        cout<<"calling predessor left for index "<<i<<endl;
+        int k=predecessor(node->left,t,i);
+        if(k==0)node->weight-=delCount;
+        return k;
     }
-    else if (currIndex >= node->weight + node->length)
+    else if (i >= node->weight + node->length)
     {
         t=node;
-        predecessor(node->right,t,i-node->weight + node->length);
+        cout<<"calling predessor right for index "<<i<<endl;
+        int k= predecessor(node->right,t,i-node->weight - node->length);
+        if(k==0)k=1;
+        return k;
     }
-
+    return 1;
 }
 void PieceTable::deletion(int index){
     if(state==1){
@@ -190,15 +151,22 @@ void PieceTable::deletion(int index){
         state=2;
     }
     if(state == 2){
-        current_piece->length--;
-        GlobalIndex--;
-        if(current_piece->length ==0){
+        //current_piece->length--;
+        //GlobalIndex--;
+        //currIndex--;
+        if(current_piece->length ==1){
             pieceNode* temp;
-            predecessor(head,temp,currIndex-1);
+            predecessor(head,temp,currIndex);
+            current_piece->length--;
+            GlobalIndex--;
+            currIndex=GlobalIndex;
             head=AVLDeletion(head,index-1);
             current_piece=temp;
-            currIndex=GlobalIndex;
             delCount=0;
+        }else{
+            current_piece->length--;
+            GlobalIndex--;
+            currIndex--;
         }
     }else{
         newDeletion(head,index);
@@ -206,26 +174,36 @@ void PieceTable::deletion(int index){
     }
 }
 pieceNode* PieceTable::newDeletion(pieceNode* node, int index){
+    cout<<"newdel called for node"<<node<<endl;
     if (!node) return NULL;      
     if (index <= node->weight){
         node->left = newDeletion(node->left, index);
     }
     else if (index > node->weight + node->length){
+        cout<<"hii"<<endl;
         node->right = newDeletion(node->right, index - node->weight - node->length);
     }else if(index == node->weight + node->length){
+        cout<<"hiiiiii"<<endl;
         current_piece=node;
-        current_piece->length--;
-        GlobalIndex--;
-        currIndex=GlobalIndex;
-        if(current_piece->length ==0){
+        if(current_piece->length ==1){
             pieceNode* temp;
             predecessor(head,temp,currIndex);
-            head=AVLDeletion(head,currIndex);
+            current_piece->length--;
+            GlobalIndex--;
+            currIndex=GlobalIndex;
+            node=AVLDeletion(node,index);
             current_piece=temp;
             delCount=0;
+        }else{
+            current_piece->length--;
+            GlobalIndex--;
+            currIndex=GlobalIndex;
         }
     }else{
+        
         node->left=createInsert(node->left,'a',index,index-node->weight,1);
+        //view(head);
+        cout<<"biiiiii"<<endl;
         current_piece->source = node->source;
         current_piece->start = node->start;
         current_piece->left = NULL;
@@ -239,10 +217,14 @@ pieceNode* PieceTable::newDeletion(pieceNode* node, int index){
         current_piece->length--;
         GlobalIndex--;
         currIndex=GlobalIndex;
+        view(head);
         if(current_piece->length ==0){
+            cout<<"biiiiiiiiiii"<<currIndex<<endl;
             pieceNode* temp;
             predecessor(head,temp,currIndex);
-            head=AVLDeletion(head,currIndex);
+            cout<<"temp is "<<temp<<endl;
+
+            node=AVLDeletion(node,index);
             current_piece=temp;
             delCount=0;
         }
@@ -257,27 +239,22 @@ pieceNode *minValueNode(pieceNode *node)
     }
     return current;
 }
-
-pieceNode *PieceTable::AVLDeletion(pieceNode *node, int index){
-    if (!node) return NULL;      
-    if (index <= node->weight){
-        node->weight-=delCount;
-        node->left = AVLDeletion(node->left, index);
-    }
-    else if (index > node->weight + node->length){
-        node->right = AVLDeletion(node->right, index - node->weight - node->length);
-    }
-    else
-    {
+pieceNode *PieceTable::AVLDeletion(pieceNode *node, int index, pieceNode* type){
+    cout<<"AVL deletion called at index "<<index<<endl;
+    if (!node) return NULL; 
+    if(node->length==0||type==node){
         if ((node->left == nullptr) || 
             (node->right == nullptr)) {
             pieceNode *temp = node->left ? 
-                         node->left : node->right;
+                node->left : node->right;
 
             // No child case
             if (temp == nullptr) {
+                cout<<"NO CHILD-----"<<endl;
                 temp = node;
-                node = nullptr;
+                node = NULL;
+                delete temp;
+                return NULL;
             } else // One child case
                 *node = *temp; // Copy the contents of 
                                // the non-empty child
@@ -290,6 +267,7 @@ pieceNode *PieceTable::AVLDeletion(pieceNode *node, int index){
 
             // Copy the inorder successor's 
             // data to this node
+            cout<<"Copying data"<<endl;
             node->source = temp->source;
             node->length = temp->length;////////this block can be optimized
             node->start = temp->start;
@@ -298,16 +276,28 @@ pieceNode *PieceTable::AVLDeletion(pieceNode *node, int index){
 
             // Delete the inorder successor
             delCount=node->length;
-            node->right = AVLDeletion(node->right, index-node->weight-node->length);
+            cout<<"Calling AVL deletion with different type"<<endl;
+            node->right = AVLDeletion(node->right, index-node->weight-node->length,temp);
         }
     
+    }     
+    else if (index <= node->weight){
+        node->weight-=delCount;
+        node->left = AVLDeletion(node->left, index, type);
     }
+    else if (index >= node->weight + node->length){
+        cout<<"calling node right for node "<<node<<endl;
+        node->right = AVLDeletion(node->right, index - node->weight - node->length, type);
+        cout<<"got node right as "<<node->right<<endl;
+        printNode(node->right);
+        cout<<endl;
+    }
+    
     return balanceFunction(node, index);
 }
-
 pieceNode *PieceTable::balanceFunction(pieceNode *node, int index)
 {
-    if(!node)return NULL;
+    if(!node){return NULL;}
     node->height = 1 + max(height(node->left), height(node->right));
     int balance = getBalance(node);
 
@@ -321,14 +311,14 @@ pieceNode *PieceTable::balanceFunction(pieceNode *node, int index)
         return toReturn;
     }
     // Right Right Case
-    if (balance < -1 && index > node->right->length + node->right->weight)
+    if (balance < -1 && index >= node->right->length + node->right->weight)
     {
         pieceNode *toReturn = leftRotate(node);
         toReturn->weight += node->weight + node->length;
         return toReturn;
     }
     // Left Right Case
-    if (balance > 1 && index > node->left->length + node->left->weight)
+    if (balance > 1 && index >= node->left->length + node->left->weight)
     {
         node->left = leftRotate(node->left);
         pieceNode *toReturn = rightRotate(node);
@@ -348,33 +338,3 @@ pieceNode *PieceTable::balanceFunction(pieceNode *node, int index)
     }
     return node;
 };
-void PieceTable::printNode(pieceNode* node){
-    if(!node){cout<<"NULL";return;}
-    if (node->source == ADD){
-        for (int i = 0; i < node->length; i++){
-            cout << addString[i + node->start];
-        }
-    }
-    else{
-        for (int i = 0; i < node->length; i++){
-            cout << originalString[i + node->start];
-        }
-    }
-}
-
-void PieceTable::view(pieceNode* node)
-{
-    if(!node)return ;
-    view(node->left);
-    printNode(node);
-    cout<<"  Left :  ";
-    printNode(node->left);
-    cout<<"  Right :  ";
-    printNode(node->right);
-    cout<<" | weight : "<<node->weight<<endl;
-
-    view(node->right);
-}
-
-
-

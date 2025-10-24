@@ -46,8 +46,8 @@ class PieceTable
         int delCount = 0;
 
         int weightUpdator(pieceNode* node, int index);
-        pieceNode * AVLDeletion(pieceNode* node, int index);
-        void predecessor(pieceNode* node, pieceNode* &t, int i);
+        pieceNode * AVLDeletion(pieceNode* node, int index, pieceNode* type=NULL);
+        int predecessor(pieceNode* node, pieceNode* &t, int i);
         void printNode(pieceNode* node);
         void weightUpdator2(pieceNode* node, int index);
         void insert(char c, int index);
@@ -58,5 +58,8 @@ class PieceTable
         void view(pieceNode* node);
 
 };
-
+int height(pieceNode *N);
+int getBalance(pieceNode *N);
+pieceNode *rightRotate(pieceNode *y);
+pieceNode *leftRotate(pieceNode *x);
 #endif

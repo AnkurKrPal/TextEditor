@@ -1,8 +1,7 @@
 #ifndef PIECETABLE_H
 #define PIECETABLE_H
 
-#include <vector>
-#include <string>
+#include<bits/stdc++.h>
 using namespace std;
 
 enum BufferType
@@ -10,6 +9,29 @@ enum BufferType
     ORIGINAL,
     ADD
 };
+
+enum BufferType2
+{
+    addition,
+    subtraction
+};
+
+struct laststep
+{
+    BufferType2 command;
+    long long start2;
+    long long length2;
+    long long cursorStart;
+
+    laststep(BufferType2 cmmd , long long strt , long long lngth , long long cursorStrt)
+    {
+        command = cmmd;
+        start2 = strt;
+        length2 = lngth;
+        cursorStart = cursorStrt ;
+    }
+};
+
 struct pieceNode
 {
     BufferType source;
@@ -45,13 +67,23 @@ class PieceTable
         int currIndex ;
         int delCount = 0;
 
+        
+        void undofn();
+        void redofn();
+        long long start2;
+        long long length2;
+        long long cursorStart;
+        BufferType2 type2;
+        stack <laststep*> undo ;
+        stack <laststep*> redo ;
+
         int weightUpdator(pieceNode* node, int index);
         pieceNode * AVLDeletion(pieceNode* node, int index, pieceNode* type=NULL);
         int predecessor(pieceNode* node, pieceNode* &t, int i);
         void printNode(pieceNode* node);
         void weightUpdator2(pieceNode* node, int index);
-        void insert(char c, int index);
-        void deletion(int index);
+        void insert(char c, int index , int typee);
+        void deletion(int index , int typee);
         pieceNode* newDeletion(pieceNode *node, int index);
         pieceNode *balanceFunction(pieceNode *node, int index);
         pieceNode *createInsert(pieceNode *node, char c, int index, int weightUpdation, int type);

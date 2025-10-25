@@ -31,7 +31,7 @@ void PieceTable::weightUpdator2(pieceNode* node, int index){
         weightUpdator2(node->right, index-node->weight-node->length);
     }
 }
-void PieceTable::insert(char c, int index){
+void PieceTable::insert(char c, int index , int typee){
     if (state != 1){   
         
         if(delCount>0){
@@ -46,6 +46,14 @@ void PieceTable::insert(char c, int index){
         GlobalIndex++;
         head = createInsert(head, c, index, 1, 0);
         state = 1;
+
+        if(typee==0){
+            if(length2>0)undo.push(new laststep(type2 , start2 , length2 , cursorStart));
+            type2 = addition;
+            start2 = addString.length() - 1;
+            length2 = 1;
+            cursorStart = GlobalIndex - 1;
+        }
     }
 
     else if (state == 1)
@@ -53,6 +61,9 @@ void PieceTable::insert(char c, int index){
         current_piece->length++;
         GlobalIndex++;
         addString.push_back(c);
+
+
+        if(typee==0)length2++;
     }
 }
 pieceNode *PieceTable::createInsert(pieceNode *node, char c, int index, int weightUpdation, int type)
@@ -145,10 +156,40 @@ int PieceTable::predecessor(pieceNode* node, pieceNode* &t, int i){
     }
     return 1;
 }
-void PieceTable::deletion(int index){
+void PieceTable::deletion(int index , int typee){
     if(state==1){
         weightUpdator(head,index);
         state=2;
+        if(current_piece->length ==1){
+            pieceNode* temp=NULL;
+            int tempCount=delCount;
+            delCount=0;
+            predecessor(head,temp,currIndex);
+            current_piece->length--;
+            GlobalIndex--;
+            currIndex=GlobalIndex;
+            delCount=tempCount;
+            head=AVLDeletion(head,index-1);
+            current_piece=temp;
+            delCount=0;
+
+
+        }else{
+            current_piece->length--;
+            GlobalIndex--;
+            currIndex--;
+
+        }
+        
+
+        if(typee==0){
+            if(length2>0)undo.push(new laststep(type2 , start2 , length2 , cursorStart));
+            type2 = subtraction;
+            start2 = addString.length();
+            length2 = 1;
+            cursorStart = GlobalIndex+1;
+        }
+
     }
     if(state == 2){
         //current_piece->length--;
@@ -171,9 +212,20 @@ void PieceTable::deletion(int index){
             GlobalIndex--;
             currIndex--;
         }
+
+        if(typee==0)length2++;
+
     }else{
         newDeletion(head,index);
         state=2;
+
+        if(typee==0){
+            if(length2>0)undo.push(new laststep(type2 , start2 , length2 , cursorStart));
+            type2 = subtraction;
+            start2 = addString.length();
+            length2 = 1;
+            cursorStart = GlobalIndex+1;
+        }
     }
 }
 pieceNode* PieceTable::newDeletion(pieceNode* node, int index){
@@ -342,3 +394,38 @@ pieceNode *PieceTable::balanceFunction(pieceNode *node, int index)
     }
     return node;
 };
+void PieceTable::undofn(){
+    if(length2>0) undo.push(new laststep(type2 , start2 , length2 , cursorStart));
+    length2=0;
+    if(undo.empty())return;
+    laststep* latest = undo.top();
+    
+
+    if(latest->command == addition){
+        int cursor2 = latest->length2 + latest->cursorStart-1 ;
+
+        for(int i=0; i<latest->length2 ;i++){
+            deletion(cursor2,1);
+            cursor2--;
+        }
+        // cursor++;
+
+        redo.push(latest);
+        undo.pop();
+    }
+
+    else if(latest->command == subtraction){
+        int cursor2 = latest->cursorStart - latest->length2;
+
+        for(int i=0 ; i< latest->length2 ; i++){
+            insert(addString[i + latest->start2 - latest->length2] , cursor2 ,1);
+        }
+
+        redo.push(latest);
+        undo.pop();
+    }
+    
+}
+void PieceTable::redofn(){
+
+}

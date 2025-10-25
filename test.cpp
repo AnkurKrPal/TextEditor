@@ -10,15 +10,16 @@ int main(){
         char c;
         cin >> c;
         if(c>='a'&&c<='z'){
-            P.insert(c,cursor);
+            P.insert(c,cursor,0);
             cursor++;
             
         }else if(c=='5'){       // backspace
             //P.deletion(cursor);
             if(P.state!=2)P.delCount=0;
             P.delCount++;
-            P.deletion(cursor);
+            P.deletion(cursor,0);
             cursor--;
+
         }else if(c=='4'){       // left
             cursor--;
             P.GlobalIndex--;
@@ -27,6 +28,9 @@ int main(){
                 P.weightUpdator(P.head , P.currIndex);
                 P.current_piece=NULL;
             }
+            if(P.length2>0) P.undo.push(new laststep(P.type2 , P.start2 , P.length2 , P.cursorStart));
+            P.length2=0;
+            
             P.state=0;
         }else if(c=='6'){       //right
             cursor++;
@@ -36,7 +40,12 @@ int main(){
                 P.weightUpdator(P.head , P.currIndex);
                 P.current_piece=NULL;
             }
+            if(P.length2>0) P.undo.push(new laststep(P.type2 , P.start2 , P.length2 , P.cursorStart));
+            P.length2=0;
+
             P.state=0;
+        }else if(c=='8'){        //undo
+            P.undofn();
         }
         P.view(P.head);
         cout<<"Current Piece : ";

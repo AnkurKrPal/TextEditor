@@ -191,7 +191,7 @@ void PieceTable::deletion(int index , int typee){
         }
 
     }
-    if(state == 2){
+    else if(state == 2){
         //current_piece->length--;
         //GlobalIndex--;
         //currIndex--;
@@ -424,8 +424,7 @@ void PieceTable::undofn(){
         redo.push(latest);
         undo.pop();
     }
+    length2=0;
     
 }
-void PieceTable::redofn(){
-
-}
+void PieceTable::redofn(){}

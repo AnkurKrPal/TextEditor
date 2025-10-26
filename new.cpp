@@ -452,10 +452,10 @@ void PieceTable::redofn(){
     }
 
     else if(latest->command == addition){
-        int cursor2 = latest->cursorStart - latest->length2;
+        int cursor2 = latest->cursorStart ;
 
         for(int i=0 ; i< latest->length2 ; i++){
-            insert(addString[i + latest->start2 - latest->length2] , cursor2 ,1);
+            insert(addString[i + latest->start2] , cursor2 ,1);
         }
 
         undo.push(latest);

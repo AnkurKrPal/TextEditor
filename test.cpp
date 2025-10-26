@@ -46,6 +46,8 @@ int main(){
             P.state=0;
         }else if(c=='8'){        //undo
             P.undofn();
+        }else if(c=='9'){
+            P.redofn();
         }
         P.view(P.head);
         cout<<"Current Piece : ";

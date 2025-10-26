@@ -53,6 +53,8 @@ void PieceTable::insert(char c, int index , int typee){
             start2 = addString.length() - 1;
             length2 = 1;
             cursorStart = GlobalIndex - 1;
+
+            while(!redo.empty())redo.pop();
         }
     }
 
@@ -188,6 +190,8 @@ void PieceTable::deletion(int index , int typee){
             start2 = addString.length();
             length2 = 1;
             cursorStart = GlobalIndex+1;
+
+            while(!redo.empty())redo.pop();
         }
 
     }
@@ -225,6 +229,8 @@ void PieceTable::deletion(int index , int typee){
             start2 = addString.length();
             length2 = 1;
             cursorStart = GlobalIndex+1;
+
+            while(!redo.empty())redo.pop();
         }
     }
 }
@@ -427,4 +433,32 @@ void PieceTable::undofn(){
     length2=0;
     
 }
-void PieceTable::redofn(){}
+void PieceTable::redofn(){
+    if(redo.empty())return;
+    laststep* latest = redo.top();
+    
+
+    if(latest->command == subtraction){
+        int cursor2 = latest->length2 + latest->cursorStart-1 ;
+
+        for(int i=0; i<latest->length2 ;i++){
+            deletion(cursor2,1);
+            cursor2--;
+        }
+        // cursor++;
+
+        undo.push(latest);
+        redo.pop();
+    }
+
+    else if(latest->command == addition){
+        int cursor2 = latest->cursorStart - latest->length2;
+
+        for(int i=0 ; i< latest->length2 ; i++){
+            insert(addString[i + latest->start2 - latest->length2] , cursor2 ,1);
+        }
+
+        undo.push(latest);
+        redo.pop();
+    }
+}

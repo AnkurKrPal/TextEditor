@@ -319,7 +319,12 @@ pieceNode *PieceTable::AVLDeletion(pieceNode *node, int index, pieceNode* type){
             } else // One child case
                 *node = *temp; // Copy the contents of 
                                // the non-empty child
-            free(temp);
+                if(node->left) {
+                    free(node);
+                    return temp;
+                }
+                *node = *temp;
+                free(temp);
         } else {
             // node with two children: Get the 
             // inorder successor (smallest in 

@@ -220,7 +220,7 @@ void PieceTable::deletion(int index , int typee){
         if(typee==0)length2++;
 
     }else{
-        newDeletion(head,index);
+        head = newDeletion(head,index);
         state=2;
 
         if(typee==0){
@@ -317,7 +317,7 @@ pieceNode *PieceTable::AVLDeletion(pieceNode *node, int index, pieceNode* type){
                 delete temp;
                 return NULL;
             } else // One child case
-                *node = *temp; // Copy the contents of 
+                                 // Copy the contents of 
                                // the non-empty child
                 if(node->left) {
                     free(node);
@@ -413,11 +413,23 @@ void PieceTable::undofn(){
     
 
     if(latest->command == addition){
-        int cursor2 = latest->length2 + latest->cursorStart-1 ;
+        int cursor2 = latest->length2 + latest->cursorStart ;
+        GlobalIndex = cursor2;
 
         for(int i=0; i<latest->length2 ;i++){
+            if(state!=2)delCount=0;
+            delCount++;
+            cout<<"## : "<<cursor2<<endl;
             deletion(cursor2,1);
             cursor2--;
+
+            view(head);
+            cout<<"Current Piece : ";
+            printNode(current_piece);
+            cout<<"  Head : ";
+            printNode(head);
+            cout<<" | state : "<<state<<" | currIndex : "<<currIndex<<"  |  GlobalIndex : "<<GlobalIndex<<"  |  delCount : "<<delCount<<endl;
+            cout<<endl;
         }
         // cursor++;
 
@@ -447,6 +459,8 @@ void PieceTable::redofn(){
         int cursor2 = latest->length2 + latest->cursorStart-1 ;
 
         for(int i=0; i<latest->length2 ;i++){
+            if(state!=2)delCount=0;
+            delCount++;
             deletion(cursor2,1);
             cursor2--;
         }

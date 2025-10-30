@@ -35,11 +35,11 @@ void PieceTable::insert(char c, int index , int typee){
     if (state != 1){   
         
         if(delCount>0){
-            weightUpdator2(head,index);
+            weightUpdator2(head,currIndex);
             delCount=0;
         }else if(current_piece){
             cout<<"namaste"<<endl;
-            weightUpdator(head,index);
+            weightUpdator(head,currIndex);
         }
         
         currIndex = index ;
@@ -160,7 +160,7 @@ int PieceTable::predecessor(pieceNode* node, pieceNode* &t, int i){
 }
 void PieceTable::deletion(int index , int typee){
     if(state==1){
-        weightUpdator(head,index);
+        weightUpdator(head,currIndex);
         state=2;
         if(current_piece->length ==1){
             pieceNode* temp=NULL;

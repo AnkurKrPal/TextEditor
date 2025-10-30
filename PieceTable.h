@@ -22,13 +22,15 @@ struct laststep
     long long start2;
     long long length2;
     long long cursorStart;
+    vector<char> charStack;
 
-    laststep(BufferType2 cmmd , long long strt , long long lngth , long long cursorStrt)
+    laststep(BufferType2 cmmd , long long strt , long long lngth , long long cursorStrt , vector<char> charstack)
     {
         command = cmmd;
         start2 = strt;
         length2 = lngth;
         cursorStart = cursorStrt ;
+        charStack = charstack;
     }
 };
 
@@ -73,9 +75,11 @@ class PieceTable
         long long start2;
         long long length2;
         long long cursorStart;
+        vector<char> charStack ;
         BufferType2 type2;
         stack <laststep*> undo ;
         stack <laststep*> redo ;
+        char deletedChar ;
 
         int weightUpdator(pieceNode* node, int index);
         pieceNode * AVLDeletion(pieceNode* node, int index, pieceNode* type=NULL);
@@ -90,6 +94,7 @@ class PieceTable
         void view(pieceNode* node);
 
 };
+
 int height(pieceNode *N);
 int getBalance(pieceNode *N);
 pieceNode *rightRotate(pieceNode *y);

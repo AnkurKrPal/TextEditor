@@ -28,7 +28,7 @@ int main(){
                 P.weightUpdator(P.head , P.currIndex);
                 P.current_piece=NULL;
             }
-            if(P.length2>0) P.undo.push(new laststep(P.type2 , P.start2 , P.length2 , P.cursorStart));
+            if(P.length2>0) P.undo.push(new laststep(P.type2 , P.start2 , P.length2 , P.cursorStart , P.charStack));
             P.length2=0;
             
             P.state=0;
@@ -40,12 +40,12 @@ int main(){
                 P.weightUpdator(P.head , P.currIndex);
                 P.current_piece=NULL;
             }
-            if(P.length2>0) P.undo.push(new laststep(P.type2 , P.start2 , P.length2 , P.cursorStart));
+            if(P.length2>0) P.undo.push(new laststep(P.type2 , P.start2 , P.length2 , P.cursorStart , P.charStack));
             P.length2=0;
 
             P.state=0;
         }else if(c=='8'){        //undo
-            if(P.length2>0) P.undo.push(new laststep(P.type2 , P.start2 , P.length2 , P.cursorStart));
+            if(P.length2>0) P.undo.push(new laststep(P.type2 , P.start2 , P.length2 , P.cursorStart , P.charStack));
             P.length2=0;
             if(P.state==2){P.weightUpdator2(P.head,P.currIndex);P.delCount=0;P.current_piece=NULL;}
             if(P.state==1){

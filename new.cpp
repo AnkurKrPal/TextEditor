@@ -48,7 +48,7 @@ void PieceTable::insert(char c, int index , int typee){
         state = 1;
 
         if(typee==0){
-            if(length2>0)undo.push(new laststep(type2 , start2 , length2 , cursorStart));
+            if(length2>0)undo.push(new laststep(type2 , start2 , length2 , cursorStart , charStack));
             type2 = addition;
             start2 = addString.length() - 1;
             length2 = 1;
@@ -167,7 +167,9 @@ void PieceTable::deletion(int index , int typee){
             int tempCount=delCount;
             delCount=0;
             predecessor(head,temp,currIndex);
+            
             current_piece->length--;
+            deletedChar=(current_piece->source==ADD)?addString[current_piece->start+current_piece->length]:originalString[current_piece->start+current_piece->length];
             GlobalIndex--;
             currIndex=GlobalIndex;
             delCount=tempCount;
@@ -178,6 +180,7 @@ void PieceTable::deletion(int index , int typee){
 
         }else{
             current_piece->length--;
+            deletedChar=(current_piece->source==ADD)?addString[current_piece->start+current_piece->length]:originalString[current_piece->start+current_piece->length];
             GlobalIndex--;
             currIndex--;
 
@@ -185,11 +188,13 @@ void PieceTable::deletion(int index , int typee){
         
 
         if(typee==0){
-            if(length2>0)undo.push(new laststep(type2 , start2 , length2 , cursorStart));
+            if(length2>0)undo.push(new laststep(type2 , start2 , length2 , cursorStart, charStack));
+            charStack.clear();
             type2 = subtraction;
             start2 = addString.length();
             length2 = 1;
             cursorStart = GlobalIndex+1;
+            charStack.push_back(deletedChar);
 
             while(!redo.empty())redo.pop();
         }
@@ -205,6 +210,7 @@ void PieceTable::deletion(int index , int typee){
             delCount=0;
             predecessor(head,temp,currIndex);
             current_piece->length--;
+            deletedChar=(current_piece->source==ADD)?addString[current_piece->start+current_piece->length]:originalString[current_piece->start+current_piece->length];
             GlobalIndex--;
             currIndex=GlobalIndex;
             delCount=tempCount;
@@ -213,22 +219,28 @@ void PieceTable::deletion(int index , int typee){
             delCount=0;
         }else{
             current_piece->length--;
+            deletedChar=(current_piece->source==ADD)?addString[current_piece->start+current_piece->length]:originalString[current_piece->start+current_piece->length];
             GlobalIndex--;
             currIndex--;
         }
 
-        if(typee==0)length2++;
+        if(typee==0){
+            length2++;
+            charStack.push_back(deletedChar);
+        }
 
     }else{
         head = newDeletion(head,index);
         state=2;
 
         if(typee==0){
-            if(length2>0)undo.push(new laststep(type2 , start2 , length2 , cursorStart));
+            if(length2>0)undo.push(new laststep(type2 , start2 , length2 , cursorStart , charStack));
+            charStack.clear();
             type2 = subtraction;
             start2 = addString.length();
             length2 = 1;
             cursorStart = GlobalIndex+1;
+            charStack.push_back(deletedChar);
 
             while(!redo.empty())redo.pop();
         }
@@ -250,6 +262,7 @@ pieceNode* PieceTable::newDeletion(pieceNode* node, int index){
             pieceNode* temp=NULL;
             predecessor(head,temp,currIndex);
             current_piece->length--;
+            deletedChar=(current_piece->source==ADD)?addString[current_piece->start+current_piece->length]:originalString[current_piece->start+current_piece->length];
             GlobalIndex--;
             currIndex=GlobalIndex;
             node=AVLDeletion(node,index-1);
@@ -257,6 +270,7 @@ pieceNode* PieceTable::newDeletion(pieceNode* node, int index){
             delCount=0;
         }else{
             current_piece->length--;
+            deletedChar=(current_piece->source==ADD)?addString[current_piece->start+current_piece->length]:originalString[current_piece->start+current_piece->length];
             GlobalIndex--;
             currIndex=GlobalIndex;
         }
@@ -276,6 +290,7 @@ pieceNode* PieceTable::newDeletion(pieceNode* node, int index){
         node->length=node->length + node->weight - index;
         node->weight += index - node->weight;
         current_piece->length--;
+        deletedChar=(current_piece->source==ADD)?addString[current_piece->start+current_piece->length]:originalString[current_piece->start+current_piece->length];
         GlobalIndex--;
         currIndex=GlobalIndex;
         view(head);
@@ -406,7 +421,7 @@ pieceNode *PieceTable::balanceFunction(pieceNode *node, int index)
     return node;
 };
 void PieceTable::undofn(){
-    if(length2>0) undo.push(new laststep(type2 , start2 , length2 , cursorStart));
+    if(length2>0) undo.push(new laststep(type2 , start2 , length2 , cursorStart , charStack));
     length2=0;
     if(undo.empty())return;
     laststep* latest = undo.top();
@@ -439,9 +454,11 @@ void PieceTable::undofn(){
 
     else if(latest->command == subtraction){
         int cursor2 = latest->cursorStart - latest->length2;
+        GlobalIndex = cursor2;
 
         for(int i=0 ; i< latest->length2 ; i++){
-            insert(addString[i + latest->start2 - latest->length2] , cursor2 ,1);
+            insert(latest->charStack[latest->length2 - 1 - i] , cursor2 ,1);
+            cursor2++;
         }
 
         redo.push(latest);

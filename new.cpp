@@ -252,7 +252,7 @@ pieceNode* PieceTable::newDeletion(pieceNode* node, int index){
             current_piece->length--;
             GlobalIndex--;
             currIndex=GlobalIndex;
-            node=AVLDeletion(node,index);
+            node=AVLDeletion(node,index-1);
             current_piece=temp;
             delCount=0;
         }else{
@@ -285,7 +285,7 @@ pieceNode* PieceTable::newDeletion(pieceNode* node, int index){
             predecessor(head,temp,currIndex);
             cout<<"temp is "<<temp<<endl;
 
-            node=AVLDeletion(node,index);
+            node->left=AVLDeletion(node->left,index-1);
             current_piece=temp;
             delCount=0;
         }

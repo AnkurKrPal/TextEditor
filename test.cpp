@@ -53,8 +53,17 @@ int main(){
                 P.current_piece=NULL;
             }
             P.state=0;
-            P.undofn();
             
+            P.undofn();
+            if(P.state==2){
+                P.weightUpdator2(P.head,P.currIndex);P.delCount=0;P.current_piece=NULL;
+            }
+            if(P.state==1){
+                P.weightUpdator(P.head , P.currIndex);
+                P.current_piece=NULL;
+            }
+            P.state=0;
+            cursor=P.GlobalIndex;
         }else if(c=='9'){
             if(P.state==2){
                 P.weightUpdator2(P.head,P.currIndex);P.delCount=0;P.current_piece=NULL;

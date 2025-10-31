@@ -473,7 +473,8 @@ void PieceTable::redofn(){
     
 
     if(latest->command == subtraction){
-        int cursor2 = latest->length2 + latest->cursorStart-1 ;
+        int cursor2 = latest->cursorStart ; 
+        GlobalIndex = cursor2 ;
 
         for(int i=0; i<latest->length2 ;i++){
             if(state!=2)delCount=0;
@@ -489,9 +490,11 @@ void PieceTable::redofn(){
 
     else if(latest->command == addition){
         int cursor2 = latest->cursorStart ;
+        GlobalIndex = cursor2;
 
         for(int i=0 ; i< latest->length2 ; i++){
-            insert(addString[i + latest->start2] , cursor2 ,1);
+            insert(latest->charStack[latest->length2 - 1- i], cursor2 ,1);
+            cursor2++;
         }
 
         undo.push(latest);

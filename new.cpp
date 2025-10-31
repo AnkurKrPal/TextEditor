@@ -48,11 +48,14 @@ void PieceTable::insert(char c, int index , int typee){
         state = 1;
 
         if(typee==0){
+            
             if(length2>0)undo.push(new laststep(type2 , start2 , length2 , cursorStart , charStack));
             type2 = addition;
             start2 = addString.length() - 1;
             length2 = 1;
             cursorStart = GlobalIndex - 1;
+            charStack.clear();
+            charStack.push_back(c);
 
             while(!redo.empty())redo.pop();
         }
@@ -65,7 +68,10 @@ void PieceTable::insert(char c, int index , int typee){
         addString.push_back(c);
 
 
-        if(typee==0)length2++;
+        if(typee==0){
+            length2++;
+            charStack.push_back(c);
+        }
     }
 }
 pieceNode *PieceTable::createInsert(pieceNode *node, char c, int index, int weightUpdation, int type)
@@ -315,7 +321,7 @@ pieceNode *minValueNode(pieceNode *node)
     }
     return current;
 }
-pieceNode *PieceTable::AVLDeletion(pieceNode *node, int index, pieceNode* type){
+pieceNode* PieceTable::AVLDeletion(pieceNode *node, int index, pieceNode* type){
     cout<<"AVL deletion called at index "<<index<<endl;
     if (!node) return NULL; 
     if(node->length==0||type==node){
@@ -491,9 +497,10 @@ void PieceTable::redofn(){
     else if(latest->command == addition){
         int cursor2 = latest->cursorStart ;
         GlobalIndex = cursor2;
+        cout<<cursor2<< ": this is cursor2"<<endl ;
 
         for(int i=0 ; i< latest->length2 ; i++){
-            insert(latest->charStack[latest->length2 - 1- i], cursor2 ,1);
+            insert(latest->charStack[i], cursor2 ,1);
             cursor2++;
         }
 

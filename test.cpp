@@ -65,6 +65,16 @@ int main(){
             P.state=0;
             cursor=P.GlobalIndex;
         }else if(c=='9'){
+            if(P.length2>0) P.undo.push(new laststep(P.type2 , P.start2 , P.length2 , P.cursorStart , P.charStack));
+            P.length2=0;
+            if(P.state==2){P.weightUpdator2(P.head,P.currIndex);P.delCount=0;P.current_piece=NULL;}
+            if(P.state==1){
+                P.weightUpdator(P.head , P.currIndex);
+                P.current_piece=NULL;
+            }
+            P.state=0;
+            
+            P.redofn();
             if(P.state==2){
                 P.weightUpdator2(P.head,P.currIndex);P.delCount=0;P.current_piece=NULL;
             }
@@ -72,8 +82,8 @@ int main(){
                 P.weightUpdator(P.head , P.currIndex);
                 P.current_piece=NULL;
             }
-            P.redofn();
             P.state=0;
+            cursor=P.GlobalIndex;
         }
         P.view(P.head);
         cout<<"Current Piece : ";

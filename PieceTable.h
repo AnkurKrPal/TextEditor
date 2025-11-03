@@ -1,37 +1,102 @@
 #ifndef PIECETABLE_H
 #define PIECETABLE_H
 
-#include <vector>
-#include <string>
+#include<bits/stdc++.h>
 using namespace std;
 
-class PieceTable {
-public:
-    
-    int state=0;
-    
-    enum BufferType {
-        ORIGINAL,
-        ADD
-    };
-
-    typedef struct Piece {
-        BufferType source;
-        size_t start;
-        size_t length;
-    }piece;
-
-    void insert(char c, int index);
-    void deletion(int index);
-    int nextIndex(int index);
-    void view();
-    void start();
-    void end();
-    piece* current_piece = NULL;
-    string originalString="";
-    string addString="";
-    vector<Piece*> Pieces;    
-    
+enum BufferType
+{
+    ORIGINAL,
+    ADD
 };
 
+enum BufferType2
+{
+    addition,
+    subtraction
+};
+
+struct laststep
+{
+    BufferType2 command;
+    long long start2;
+    long long length2;
+    long long cursorStart;
+    vector<char> charStack;
+
+    laststep(BufferType2 cmmd , long long strt , long long lngth , long long cursorStrt , vector<char> charstack)
+    {
+        command = cmmd;
+        start2 = strt;
+        length2 = lngth;
+        cursorStart = cursorStrt ;
+        charStack = charstack;
+    }
+};
+
+struct pieceNode
+{
+    BufferType source;
+    size_t start;
+    size_t length;
+    pieceNode *left;
+    pieceNode *right;
+    int weight;
+    int height;
+
+    pieceNode(BufferType src, size_t s, size_t l)
+    {
+        source = src;
+        start = s;
+        length = l;
+        left = NULL;
+        right = NULL;
+        height = 1;
+        weight = 0;
+    }
+};
+
+class PieceTable
+{
+
+    public:
+        pieceNode *current_piece = NULL;
+        string originalString = "";
+        pieceNode *head=NULL;
+        string addString = "";
+        int state = 0;
+        int GlobalIndex = 0;
+        int currIndex ;
+        int delCount = 0;
+
+        
+        void undofn();
+        void redofn();
+        long long start2;
+        long long length2;
+        long long cursorStart;
+        vector<char> charStack ;
+        BufferType2 type2;
+        stack <laststep*> undo ;
+        stack <laststep*> redo ;
+        char deletedChar ;
+
+        int weightUpdator(pieceNode* node, int index);
+        pieceNode * AVLDeletion(pieceNode* node, int index, pieceNode* type=NULL);
+        int predecessor(pieceNode* node, pieceNode* &t, int i);
+        void printNode(pieceNode* node);
+        void weightUpdator2(pieceNode* node, int index);
+        void insert(char c, int index , int typee);
+        void deletion(int index , int typee);
+        pieceNode* newDeletion(pieceNode *node, int index);
+        pieceNode *balanceFunction(pieceNode *node, int index);
+        pieceNode *createInsert(pieceNode *node, char c, int index, int weightUpdation, int type);
+        void view(pieceNode* node);
+
+};
+
+int height(pieceNode *N);
+int getBalance(pieceNode *N);
+pieceNode *rightRotate(pieceNode *y);
+pieceNode *leftRotate(pieceNode *x);
 #endif

@@ -49,7 +49,9 @@ pieceNode *leftRotate(pieceNode *x)
     // Return new root
     return y;
 }
-void PieceTable::printNode(pieceNode* node){
+
+void PieceTable::printNode(pieceNode *node)
+{
     if(!node){cout<<"NULL";return;}
     if (node->source == ADD){
         for (int i = 0; i < node->length; i++){
@@ -75,4 +77,20 @@ void PieceTable::view(pieceNode* node)
     cout<<" | weight : "<<node->weight<<" | height : "<<node->height<<" | length : "<<node->length<<" | start : "<<node->start<<"  |  Address : "<<node<<endl;
 
     view(node->right);
+}
+
+std::string PieceTable::printTrial(pieceNode* node) {
+    if(!node)return "";
+    std::string str=(node->source==ADD)?addString.substr(node->start,node->length):originalString.substr(node->start,node->length);
+    return printTrial(node->left)+str+printTrial(node->right);
+}
+void insertChar(PieceTable &P, char c, int &cursor){
+    P.insert(c,cursor,0);
+    cursor++;
+}
+void deleteChar(PieceTable P, int &cursor){
+     if(P.state!=2)P.delCount=0;
+            P.delCount++;
+            P.deletion(cursor,0);
+            cursor--;
 }

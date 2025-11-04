@@ -91,6 +91,8 @@ class PieceTable
         pieceNode* newDeletion(pieceNode *node, int index);
         pieceNode *balanceFunction(pieceNode *node, int index);
         pieceNode *createInsert(pieceNode *node, char c, int index, int weightUpdation, int type);
+        
+        std::string printTrial(pieceNode* node);
         void view(pieceNode* node);
 
 };
@@ -99,4 +101,6 @@ int height(pieceNode *N);
 int getBalance(pieceNode *N);
 pieceNode *rightRotate(pieceNode *y);
 pieceNode *leftRotate(pieceNode *x);
+void insertChar(PieceTable &P, char c, int &cursor);
+void deleteChar(PieceTable P, int &cursor);
 #endif

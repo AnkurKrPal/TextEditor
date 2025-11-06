@@ -58,7 +58,7 @@ void PieceTable::insert(char c, int index , int typee){
             charStack.clear();
             charStack.push_back(c);
 
-            while(!redo.empty())redo.pop();
+            while(!redo.empty()) { delete redo.top(); redo.pop(); }
         }
     }
 
@@ -203,7 +203,7 @@ void PieceTable::deletion(int index , int typee){
             cursorStart = GlobalIndex+1;
             charStack.push_back(deletedChar);
 
-            while(!redo.empty())redo.pop();
+            while(!redo.empty()) { delete redo.top(); redo.pop(); }
         }
 
     }
@@ -249,7 +249,7 @@ void PieceTable::deletion(int index , int typee){
             cursorStart = GlobalIndex+1;
             charStack.push_back(deletedChar);
 
-            while(!redo.empty())redo.pop();
+            while(!redo.empty()) { delete redo.top(); redo.pop(); }
         }
     }
 }
@@ -342,11 +342,14 @@ pieceNode* PieceTable::AVLDeletion(pieceNode *node, int index, pieceNode* type){
                                  // Copy the contents of 
                                // the non-empty child
                 if(node->left) {
-                    free(node);
+                    delete node;
                     return temp;
                 }
-                *node = *temp;
-                free(temp);
+                node->source = temp->source;
+                node->start = temp->start;
+                node->length = temp->length;
+
+                delete temp;
         } else {
             // node with two children: Get the 
             // inorder successor (smallest in 

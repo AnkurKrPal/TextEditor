@@ -103,4 +103,8 @@ pieceNode *rightRotate(pieceNode *y);
 pieceNode *leftRotate(pieceNode *x);
 void insertChar(PieceTable &P, char c, int &cursor);
 void deleteChar(PieceTable P, int &cursor);
+
+void performUndo(PieceTable &P, int &cursor);
+void performRedo(PieceTable &P, int &cursor);
+
 #endif

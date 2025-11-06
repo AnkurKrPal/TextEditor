@@ -15,6 +15,8 @@ public:
 protected:
     void paintEvent(QPaintEvent *event) override;
     void mousePressEvent(QMouseEvent *event) override;
+    void keyPressEvent(QKeyEvent *event) override;
+    void wheelEvent(QWheelEvent *event) override;
 
 private slots:
     void toggleCursorVisibility();
@@ -22,14 +24,29 @@ private slots:
 private:
     bool cursorVisible;
     QTimer *cursorTimer;
-    int cursorRow, cursorCol;
+
+    int cursorRow;
+    int cursorCol;
 
     int cellWidth;
     int cellHeight;
 
-    void drawGrid(QPainter &painter);
+    QString cachedText;
+
+    // Vertical scrolling
+    int scrollOffset = 0;  
+    int visibleLines = 0;  
+
+    // ✅ Horizontal scrolling
+    int hScrollOffset = 0;
+    int visibleCols = 0;
+
     void drawCursor(QPainter &painter);
-    void drawCenterText(QPainter &painter);   // <-- Added for center text
+    void updateCursorPosition();
+    int  computeCursorIndexFromMouse(int x, int y);
+
+    void finalizeCursorMove();
+    void scrollToCursor();   // ✅ Will now handle both directions
 };
 
-#endif // MAINWINDOW_H
+#endif

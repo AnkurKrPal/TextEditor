@@ -74,6 +74,12 @@ void PieceTable::insert(char c, int index , int typee){
             charStack.push_back(c);
         }
     }
+    head = cleanupZeroLength(head);
+    recomputeWeights(head);
+    current_piece = findByIndex(head, currIndex);
+    if(!current_piece){
+        current_piece = findPredNode(head, currIndex);
+    }
 }
 
 pieceNode *PieceTable::createInsert(pieceNode *node, char c, int index, int weightUpdation, int type)
@@ -252,6 +258,13 @@ void PieceTable::deletion(int index , int typee){
 
             while(!redo.empty()) { delete redo.top(); redo.pop(); }
         }
+    }
+
+    head = cleanupZeroLength(head);
+    recomputeWeights(head);
+    current_piece = findByIndex(head, currIndex);
+    if(!current_piece){
+        current_piece = findPredNode(head, currIndex);
     }
 }
 pieceNode* PieceTable::newDeletion(pieceNode* node, int index){

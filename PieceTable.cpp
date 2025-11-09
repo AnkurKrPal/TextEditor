@@ -2,6 +2,21 @@
 #include "helper.cpp"
 #include <bits/stdc++.h>
 using namespace std;
+
+
+static int subChar(pieceNode* n){
+    if(!n) return 0;
+    return subChar(n->left)+n->length+subChar(n->right);
+}
+
+static void recomputeWeights(pieceNode* n){
+    if(!n) return;
+    recomputeWeights(n->left);
+    recomputeWeights(n->right);
+    n->weight=subChar(n->left);
+    n->height=1+max(height(n->left),height(n->right));
+}
+
 int PieceTable::weightUpdator(pieceNode* node, int index){
     if(node==current_piece){
         return current_piece->length-1;

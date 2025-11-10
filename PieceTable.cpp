@@ -16,6 +16,20 @@ static void recomputeWeights(pieceNode* n){
     n->weight=subChar(n->left);
     n->height=1+max(height(n->left),height(n->right));
 }
+static pieceNode* findInd(pieceNode* node, int i){
+    while(node){
+        if(i<0) return NULL;
+        if(i<=node->weight){
+            node= node->left;
+        }else if(i >= node->weight + node->length){
+            i -= node->weight+ node->length;
+            node= node->right;
+        }else{
+            return node;
+        }
+    }
+    return NULL;
+}
 
 int PieceTable::weightUpdator(pieceNode* node, int index){
     if(node==current_piece){

@@ -31,6 +31,47 @@ static pieceNode* findInd(pieceNode* node, int i){
     return NULL;
 }
 
+static pieceNode* cleanupZeroLength(pieceNode* root){
+    if(!root) return NULL;
+    root->left  = cleanupZeroLength(root->left);
+    root->right = cleanupZeroLength(root->right);
+    if(root->length == 0){
+        pieceNode* L = root->left;
+        pieceNode* R = root->right;
+        if(!L && !R){
+            delete root;
+            return NULL;
+        }else if(!L){
+            pieceNode* keep = R;
+            delete root;
+            return keep;
+        }else if(!R){
+            pieceNode* keep = L;
+            delete root;
+            return keep;
+        }else{
+            pieceNode* s = R;
+            while(s->left) s = s->left;
+            root->source = s->source;
+            root->start  = s->start;
+            root->length = s->length;
+            // remove s from right subtree
+            pieceNode* parent = root;
+            pieceNode* cur = root->right;
+            while(cur && cur->left){
+                parent = cur;
+                cur = cur->left;
+            }
+            if(parent == root) parent->right = cur->right;
+            else               parent->left  = cur->right;
+            delete cur;
+        }
+    }
+    root->weight = subtreeChars(root->left);
+    root->height = 1 + max(height(root->left), height(root->right));
+    return root;
+}
+
 int PieceTable::weightUpdator(pieceNode* node, int index){
     if(node==current_piece){
         return current_piece->length-1;

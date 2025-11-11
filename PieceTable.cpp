@@ -31,6 +31,27 @@ static pieceNode* findInd(pieceNode* node, int i){
     return NULL;
 }
 
+static pieceNode* findPredNode(pieceNode* root, int i){
+    // returns node that ends at or before i-1 (predecessor of i)
+    pieceNode* pred = NULL;
+    pieceNode* cur = root;
+    int k = i;
+    while(cur){
+        if(k <= cur->weight){
+            cur = cur->left;
+        }else if(k >= cur->weight + cur->length){
+            k -= cur->weight + cur->length;
+            pred = cur;
+            cur = cur->right;
+        }else{
+            pieceNode* t = cur->left;
+            while(t && t->right) t = t->right;
+            return t ? t : pred;
+        }
+    }
+    return pred;
+}
+
 static pieceNode* cleanupZeroLength(pieceNode* root){
     if(!root) return NULL;
     root->left  = cleanupZeroLength(root->left);
@@ -67,7 +88,7 @@ static pieceNode* cleanupZeroLength(pieceNode* root){
             delete cur;
         }
     }
-    root->weight = subtreeChars(root->left);
+    root->weight = subChar(root->left);
     root->height = 1 + max(height(root->left), height(root->right));
     return root;
 }
@@ -146,7 +167,7 @@ void PieceTable::insert(char c, int index , int typee){
     }
     head = cleanupZeroLength(head);
     recomputeWeights(head);
-    current_piece = findByIndex(head, currIndex);
+    current_piece = findInd(head, currIndex);
     if(!current_piece){
         current_piece = findPredNode(head, currIndex);
     }
@@ -336,7 +357,7 @@ void PieceTable::deletion(int index , int typee){
 
     head = cleanupZeroLength(head);
     recomputeWeights(head);
-    current_piece = findByIndex(head, currIndex);
+    current_piece = findInd(head, currIndex);
     if(!current_piece){
         current_piece = findPredNode(head, currIndex);
     }
@@ -485,7 +506,7 @@ pieceNode* PieceTable::AVLDeletion(pieceNode *node, int index, pieceNode* type){
     }
     
     node = balanceFunction(node, index);
-    node->weight = subtreeChars(node->left);
+    node->weight = subChar(node->left);
     node->height = 1 + max(height(node->left), height(node->right));
     return node;
     // return balanceFunction(node, index);
@@ -515,7 +536,7 @@ pieceNode *PieceTable::balanceFunction(pieceNode *node, int index)
         return toReturn;
     }
 
-    node->weight = subtreeChars(node->left);
+    node->weight = subChar(node->left);
     node->height = 1 + max(height(node->left), height(node->right));
     return node;
 };

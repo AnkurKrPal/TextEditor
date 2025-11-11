@@ -173,23 +173,27 @@ pieceNode *PieceTable::createInsert(pieceNode *node, char c, int index, int weig
 };
 int PieceTable::predecessor(pieceNode* node, pieceNode* &t, int i){
     cout<<"pred called for "<<node<<" at index "<<i<<" for current piece "<<current_piece<<endl;
-    if (i < 0) return 1;
+    // if (i < 0) return 1;
+    if(!node){ t = NULL; return 1; }
     if(node==current_piece){
         int k=0;
         if(node->left){
             k=1;
-            node=node->left;
-            while(node->right)node=node->right;
-            t=node;
+            // node=node->left;
+            // while(node->right)node=node->right;
+            // t=node;
+            pieceNode* x=node->left;
+            while(x->right)x=x->right;
+            t=x;
         }
         return k;
         
     }else if (i <= node->weight)
     {   
         cout<<"calling predessor left for index "<<i<<endl;
-        int k=predecessor(node->left,t,i);
-        if(k==0){node->weight-=delCount;cout<<"reducing weight of "<<node<<" in pred by "<<delCount<<endl;}
-        return k;
+        return predecessor(node->left,t,i);
+        // if(k==0){node->weight-=delCount;cout<<"reducing weight of "<<node<<" in pred by "<<delCount<<endl;}
+        // return k;
     }
     else if (i >= node->weight + node->length)
     {
@@ -381,18 +385,21 @@ pieceNode* PieceTable::AVLDeletion(pieceNode *node, int index, pieceNode* type){
                 node = NULL;
                 delete temp;
                 return NULL;
-            } else // One child case
+            } else{ // One child case
                                  // Copy the contents of 
                                // the non-empty child
-                if(node->left) {
-                    delete node;
-                    return temp;
-                }
-                node->source = temp->source;
-                node->start = temp->start;
-                node->length = temp->length;
-
-                delete temp;
+                // if(node->left) {
+                //     delete node;
+                //     return temp;
+                // }
+                // node->source = temp->source;
+                // node->start = temp->start;
+                // node->length = temp->length;
+                pieceNode* keep = temp;
+                delete node;
+                recomputeWeights(keep);
+                return keep;
+            }
         } else {
             // node with two children: Get the 
             // inorder successor (smallest in 
@@ -406,18 +413,18 @@ pieceNode* PieceTable::AVLDeletion(pieceNode *node, int index, pieceNode* type){
             node->length = temp->length;////////this block can be optimized
             node->start = temp->start;
             node->source = temp->source;
-            node->source = temp->source;
+            // node->source = temp->source;
 
             // Delete the inorder successor
-            delCount=node->length;
-            cout<<"Calling AVL deletion with different type"<<endl;
+            // delCount=node->length;
+            // cout<<"Calling AVL deletion with different type"<<endl;
             node->right = AVLDeletion(node->right, index-node->weight-node->length,temp);
         }
     
     }     
     else if (index <= node->weight){
-        node->weight-=delCount;
-        cout<<"reducing weight of "<<node<<" in AVL del by "<<delCount<<endl;
+        // node->weight-=delCount;
+        // cout<<"reducing weight of "<<node<<" in AVL del by "<<delCount<<endl;
         node->left = AVLDeletion(node->left, index, type);
     }
     else if (index >= node->weight + node->length){
@@ -427,8 +434,20 @@ pieceNode* PieceTable::AVLDeletion(pieceNode *node, int index, pieceNode* type){
         printNode(node->right);
         cout<<endl;
     }
+    else {
+        if(node->length > 0){
+            node->length--;
+        }
+        if(node->length == 0){
+            return AVLDeletion(node, index, node);
+        }
+    }
     
-    return balanceFunction(node, index);
+    node = balanceFunction(node, index);
+    node->weight = subtreeChars(node->left);
+    node->height = 1 + max(height(node->left), height(node->right));
+    return node;
+    // return balanceFunction(node, index);
 }
 pieceNode *PieceTable::balanceFunction(pieceNode *node, int index)
 {

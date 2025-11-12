@@ -19,15 +19,15 @@ enum BufferType2
 struct laststep
 {
     BufferType2 command;
-    long long start2;
+    // long long start2;
     long long length2;
     long long cursorStart;
     vector<char> charStack;
 
-    laststep(BufferType2 cmmd , long long strt , long long lngth , long long cursorStrt , vector<char> charstack)
+    laststep(BufferType2 cmmd  , long long lngth , long long cursorStrt , vector<char> charstack)
     {
         command = cmmd;
-        start2 = strt;
+        // start2 = strt;
         length2 = lngth;
         cursorStart = cursorStrt ;
         charStack = charstack;
@@ -72,7 +72,7 @@ class PieceTable
         
         void undofn();
         void redofn();
-        long long start2;
+        // long long start2;
         long long length2;
         long long cursorStart;
         vector<char> charStack ;
@@ -84,14 +84,16 @@ class PieceTable
         int weightUpdator(pieceNode* node, int index);
         pieceNode * AVLDeletion(pieceNode* node, int index, pieceNode* type=NULL);
         int predecessor(pieceNode* node, pieceNode* &t, int i);
-        void printNode(pieceNode* node);
+        // void printNode(pieceNode* node);
         void weightUpdator2(pieceNode* node, int index);
         void insert(char c, int index , int typee);
         void deletion(int index , int typee);
         pieceNode* newDeletion(pieceNode *node, int index);
         pieceNode *balanceFunction(pieceNode *node, int index);
         pieceNode *createInsert(pieceNode *node, char c, int index, int weightUpdation, int type);
-        void view(pieceNode* node);
+        
+        std::string printTrial(pieceNode* node);
+        // void view(pieceNode* node);
 
 };
 
@@ -99,4 +101,10 @@ int height(pieceNode *N);
 int getBalance(pieceNode *N);
 pieceNode *rightRotate(pieceNode *y);
 pieceNode *leftRotate(pieceNode *x);
+void insertChar(PieceTable &P, char c, int &cursor);
+void deleteChar(PieceTable P, int &cursor);
+
+void performUndo(PieceTable &P, int &cursor);
+void performRedo(PieceTable &P, int &cursor);
+
 #endif

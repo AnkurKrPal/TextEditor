@@ -1,6 +1,97 @@
 #include "PieceTable.h"
+#include "helper.cpp"
 #include <bits/stdc++.h>
 using namespace std;
+
+// ------- INTERNAL HELPERS (file-local) -------
+static int subtreeChars(pieceNode* n){
+    if(!n) return 0;
+    return subtreeChars(n->left) + n->length + subtreeChars(n->right);
+}
+static void recomputeWeights(pieceNode* n){
+    if(!n) return;
+    recomputeWeights(n->left);
+    recomputeWeights(n->right);
+    n->weight = subtreeChars(n->left);
+    n->height = 1 + max(height(n->left), height(n->right));
+}
+static pieceNode* findByIndex(pieceNode* node, int i){
+    while(node){
+        if(i < 0) return NULL;
+        if(i <= node->weight){
+            node = node->left;
+        }else if(i >= node->weight + node->length){
+            i -= node->weight + node->length;
+            node = node->right;
+        }else{
+            return node;
+        }
+    }
+    return NULL;
+}
+
+static pieceNode* findPredNode(pieceNode* root, int i){
+    // returns node that ends at or before i-1 (predecessor of i)
+    pieceNode* pred = NULL;
+    pieceNode* cur = root;
+    int k = i;
+    while(cur){
+        if(k <= cur->weight){
+            cur = cur->left;
+        }else if(k >= cur->weight + cur->length){
+            k -= cur->weight + cur->length;
+            pred = cur;
+            cur = cur->right;
+        }else{
+            pieceNode* t = cur->left;
+            while(t && t->right) t = t->right;
+            return t ? t : pred;
+        }
+    }
+    return pred;
+}
+
+static pieceNode* cleanupZeroLength(pieceNode* root){
+    if(!root) return NULL;
+    root->left  = cleanupZeroLength(root->left);
+    root->right = cleanupZeroLength(root->right);
+    if(root->length == 0){
+        pieceNode* L = root->left;
+        pieceNode* R = root->right;
+        if(!L && !R){
+            delete root;
+            return NULL;
+        }else if(!L){
+            pieceNode* keep = R;
+            delete root;
+            return keep;
+        }else if(!R){
+            pieceNode* keep = L;
+            delete root;
+            return keep;
+        }else{
+            pieceNode* s = R;
+            while(s->left) s = s->left;
+            root->source = s->source;
+            root->start  = s->start;
+            root->length = s->length;
+            // remove s from right subtree
+            pieceNode* parent = root;
+            pieceNode* cur = root->right;
+            while(cur && cur->left){
+                parent = cur;
+                cur = cur->left;
+            }
+            if(parent == root) parent->right = cur->right;
+            else               parent->left  = cur->right;
+            delete cur;
+        }
+    }
+    root->weight = subtreeChars(root->left);
+    root->height = 1 + max(height(root->left), height(root->right));
+    return root;
+}
+
 int PieceTable::weightUpdator(pieceNode* node, int index){
     if(node==current_piece){
         return current_piece->length-1;
@@ -57,7 +148,7 @@ void PieceTable::insert(char c, int index , int typee){
             charStack.clear();
             charStack.push_back(c);
 
-            while(!redo.empty())redo.pop();
+            while(!redo.empty()) { delete redo.top(); redo.pop(); }
         }
     }
 
@@ -72,6 +163,14 @@ void PieceTable::insert(char c, int index , int typee){
             length2++;
             charStack.push_back(c);
         }
+    }
+
+    // POST: stabilize
+    head = cleanupZeroLength(head);
+    recomputeWeights(head);
+    current_piece = findByIndex(head, currIndex);
+    if(!current_piece){
+        current_piece = findPredNode(head, currIndex);
     }
 }
 pieceNode *PieceTable::createInsert(pieceNode *node, char c, int index, int weightUpdation, int type)
@@ -136,23 +235,21 @@ pieceNode *PieceTable::createInsert(pieceNode *node, char c, int index, int weig
 };
 int PieceTable::predecessor(pieceNode* node, pieceNode* &t, int i){
     cout<<"pred called for "<<node<<" at index "<<i<<" for current piece "<<current_piece<<endl;
-    if (i < 0) return 1;
+    if(!node){ t = NULL; return 1; }
     if(node==current_piece){
         int k=0;
         if(node->left){
             k=1;
-            node=node->left;
-            while(node->right)node=node->right;
-            t=node;
+            pieceNode* x=node->left;
+            while(x->right)x=x->right;
+            t=x;
         }
         return k;
         
     }else if (i <= node->weight)
     {   
         cout<<"calling predessor left for index "<<i<<endl;
-        int k=predecessor(node->left,t,i);
-        if(k==0){node->weight-=delCount;cout<<"reducing weight of "<<node<<" in pred by "<<delCount<<endl;}
-        return k;
+        return predecessor(node->left,t,i);
     }
     else if (i >= node->weight + node->length)
     {
@@ -202,14 +299,11 @@ void PieceTable::deletion(int index , int typee){
             cursorStart = GlobalIndex+1;
             charStack.push_back(deletedChar);
 
-            while(!redo.empty())redo.pop();
+            while(!redo.empty()) { delete redo.top(); redo.pop(); }
         }
 
     }
     else if(state == 2){
-        //current_piece->length--;
-        //GlobalIndex--;
-        //currIndex--;
         if(current_piece->length ==1){
             pieceNode* temp=NULL;
             int tempCount=delCount;
@@ -248,8 +342,16 @@ void PieceTable::deletion(int index , int typee){
             cursorStart = GlobalIndex+1;
             charStack.push_back(deletedChar);
 
-            while(!redo.empty())redo.pop();
+            while(!redo.empty()) { delete redo.top(); redo.pop(); }
         }
+    }
+
+    // POST: stabilize
+    head = cleanupZeroLength(head);
+    recomputeWeights(head);
+    current_piece = findByIndex(head, currIndex);
+    if(!current_piece){
+        current_piece = findPredNode(head, currIndex);
     }
 }
 pieceNode* PieceTable::newDeletion(pieceNode* node, int index){
@@ -330,47 +432,33 @@ pieceNode* PieceTable::AVLDeletion(pieceNode *node, int index, pieceNode* type){
             pieceNode *temp = node->left ? 
                 node->left : node->right;
 
-            // No child case
             if (temp == nullptr) {
                 cout<<"NO CHILD-----"<<endl;
                 temp = node;
                 node = NULL;
                 delete temp;
                 return NULL;
-            } else // One child case
-                                 // Copy the contents of 
-                               // the non-empty child
-                if(node->left) {
-                    free(node);
-                    return temp;
-                }
-                *node = *temp;
-                free(temp);
+            } else {
+                pieceNode* keep = temp;
+                delete node;
+                recomputeWeights(keep);
+                return keep;
+            }
         } else {
-            // node with two children: Get the 
-            // inorder successor (smallest in 
-            // the right subtree)
             pieceNode* temp = minValueNode(node->right);
 
-            // Copy the inorder successor's 
-            // data to this node
             cout<<"Copying data"<<endl;
             node->source = temp->source;
-            node->length = temp->length;////////this block can be optimized
+            node->length = temp->length;
             node->start = temp->start;
             node->source = temp->source;
             node->source = temp->source;
 
-            // Delete the inorder successor
-            delCount=node->length;
-            cout<<"Calling AVL deletion with different type"<<endl;
             node->right = AVLDeletion(node->right, index-node->weight-node->length,temp);
         }
     
     }     
     else if (index <= node->weight){
-        node->weight-=delCount;
-        cout<<"reducing weight of "<<node<<" in AVL del by "<<delCount<<endl;
         node->left = AVLDeletion(node->left, index, type);
     }
     else if (index >= node->weight + node->length){
@@ -380,8 +468,19 @@ pieceNode* PieceTable::AVLDeletion(pieceNode *node, int index, pieceNode* type){
         printNode(node->right);
         cout<<endl;
     }
+    else {
+        if(node->length > 0){
+            node->length--;
+        }
+        if(node->length == 0){
+            return AVLDeletion(node, index, node);
+        }
+    }
     
-    return balanceFunction(node, index);
+    node = balanceFunction(node, index);
+    node->weight = subtreeChars(node->left);
+    node->height = 1 + max(height(node->left), height(node->right));
+    return node;
 }
 pieceNode *PieceTable::balanceFunction(pieceNode *node, int index)
 {
@@ -389,41 +488,25 @@ pieceNode *PieceTable::balanceFunction(pieceNode *node, int index)
     node->height = 1 + max(height(node->left), height(node->right));
     int balance = getBalance(node);
 
-    /////////conditions need to be confirmed
-
-    // Left Left Case
-    if (balance > 1 && index <= node->left->weight)
-    {
+    if (balance > 1){
+        if(getBalance(node->left) < 0){
+            node->left = leftRotate(node->left);
+        }
         pieceNode *toReturn = rightRotate(node);
-        node->weight -= toReturn->weight + toReturn->length;
+        recomputeWeights(toReturn);
         return toReturn;
     }
-    // Right Right Case
-    if (balance < -1 && index >= node->right->length + node->right->weight)
-    {
+    if (balance < -1){
+        if(getBalance(node->right) > 0){
+            node->right = rightRotate(node->right);
+        }
         pieceNode *toReturn = leftRotate(node);
-        toReturn->weight += node->weight + node->length;
-        return toReturn;
-    }
-    // Left Right Case
-    if (balance > 1 && index >= node->left->length + node->left->weight)
-    {
-        node->left = leftRotate(node->left);
-        pieceNode *toReturn = rightRotate(node);
-        toReturn->weight += toReturn->left->weight + toReturn->left->length;
-        node->weight -= toReturn->weight + toReturn->length;
+        recomputeWeights(toReturn);
         return toReturn;
     }
 
-    // Right Left Case
-    if (balance < -1 && index <= node->right->weight)
-    {
-        node->right = rightRotate(node->right);
-        pieceNode *toReturn = leftRotate(node);
-        toReturn->right->weight -= toReturn->length + toReturn->weight;
-        toReturn->weight += node->length + node->weight;
-        return toReturn;
-    }
+    node->weight = subtreeChars(node->left);
+    node->height = 1 + max(height(node->left), height(node->right));
     return node;
 };
 void PieceTable::undofn(){

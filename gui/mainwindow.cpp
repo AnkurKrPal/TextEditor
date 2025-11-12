@@ -119,7 +119,7 @@ void MainWindow::toggleCursorVisibility() {
 void MainWindow::finalizeCursorMove() {
     if (P.state == 2) { P.weightUpdator2(P.head, P.currIndex); P.delCount = 0; P.current_piece = NULL; }
     if (P.state == 1) { P.weightUpdator(P.head, P.currIndex);  P.current_piece = NULL; }
-    if (P.length2 > 0) P.undo.push(new laststep(P.type2, P.start2, P.length2, P.cursorStart, P.charStack));
+    if (P.length2 > 0) P.undo.push(new laststep(P.type2,  P.length2, P.cursorStart, P.charStack));
     P.length2 = 0;
     P.state   = 0;
     P.GlobalIndex = currCursor;
@@ -137,18 +137,25 @@ void MainWindow::updateCursorPosition() {
 }
 
 int MainWindow::computeCursorIndexFromMouse(int x, int y) {
-    int row = y / cellHeight + scrollOffset;
-    int col = x / cellWidth;
-    QStringList lines = cachedText.split('\n');
+    int topMargin = menuBar()->height();
+    int row = (y - topMargin) / cellHeight + scrollOffset;
 
+    QStringList lines = cachedText.split('\n');
     if (row < 0) row = 0;
     if (row >= lines.size()) row = lines.size() - 1;
 
+    QFontMetrics metrics(font());
+    int col = (x + metrics.horizontalAdvance('M') / 2) / cellWidth;  // ← small +½ cell correction
+
     col = std::min(col, (int)lines[row].length());
+
     int index = 0;
-    for (int i = 0; i < row; ++i) index += lines[i].length() + 1;
+    for (int i = 0; i < row; ++i)
+        index += lines[i].length() + 1;
     return index + col;
 }
+
+
 
 void MainWindow::mousePressEvent(QMouseEvent *event) {
     finalizeCursorMove();

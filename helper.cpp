@@ -50,35 +50,35 @@ pieceNode *leftRotate(pieceNode *x)
     return y;
 }
 
-void PieceTable::printNode(pieceNode *node)
-{
-    if(!node){cout<<"NULL";return;
-        }
-    if (node->source == ADD){
-        for (int i = 0; i < node->length; i++){
-            cout << addString[i + node->start];
-        }
-    }
-    else{
-        for (int i = 0; i < node->length; i++){
-            cout << originalString[i + node->start];
-        }
-    }
-}
+// void PieceTable::printNode(pieceNode *node)
+// {
+//     if(!node){return;
+//         }
+//     if (node->source == ADD){
+//         for (int i = 0; i < node->length; i++){
+//             cout << addString[i + node->start];
+//         }
+//     }
+//     else{
+//         for (int i = 0; i < node->length; i++){
+//             cout << originalString[i + node->start];
+//         }
+//     }
+// }
 
-void PieceTable::view(pieceNode* node)
-{
-    if(!node)return ;
-    view(node->left);
-    printNode(node);
-    cout<<"  Left :  ";
-    printNode(node->left);
-    cout<<"  Right :  ";
-    printNode(node->right);
-    cout<<" | weight : "<<node->weight<<" | height : "<<node->height<<" | length : "<<node->length<<" | start : "<<node->start<<"  |  Address : "<<node<<endl;
+// void PieceTable::view(pieceNode* node)
+// {
+//     if(!node)return ;
+//     view(node->left);
+//     printNode(node);
+//     cout<<"  Left :  ";
+//     printNode(node->left);
+//     cout<<"  Right :  ";
+//     printNode(node->right);
+//     cout<<" | weight : "<<node->weight<<" | height : "<<node->height<<" | length : "<<node->length<<" | start : "<<node->start<<"  |  Address : "<<node<<endl;
 
-    view(node->right);
-}
+//     view(node->right);
+// }
 
 std::string PieceTable::printTrial(pieceNode* node) {
     if(!node)return "";
@@ -99,7 +99,7 @@ void deleteChar(PieceTable P, int &cursor){
 // --------------------- UNDO / REDO WRAPPERS -------------------------
 void performUndo(PieceTable &P, int &cursor) {
     // finalize current editing session
-    if(P.length2>0) P.undo.push(new laststep(P.type2 , P.start2 , P.length2 , P.cursorStart , P.charStack));
+    if(P.length2>0) P.undo.push(new laststep(P.type2  , P.length2 , P.cursorStart , P.charStack));
     P.length2=0;
     if(P.state==2){P.weightUpdator2(P.head,P.currIndex);P.delCount=0;P.current_piece=NULL;}
     if(P.state==1){
@@ -121,7 +121,7 @@ void performUndo(PieceTable &P, int &cursor) {
 }
 
 void performRedo(PieceTable &P, int &cursor) {
-    if(P.length2>0) P.undo.push(new laststep(P.type2 , P.start2 , P.length2 , P.cursorStart , P.charStack));
+    if(P.length2>0) P.undo.push(new laststep(P.type2  , P.length2 , P.cursorStart , P.charStack));
     P.length2=0;
     if(P.state==2){P.weightUpdator2(P.head,P.currIndex);P.delCount=0;P.current_piece=NULL;}
     if(P.state==1){

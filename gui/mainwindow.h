@@ -4,6 +4,10 @@
 #include <QMainWindow>
 #include <QTimer>
 #include <QFontMetrics>
+#include <QFileDialog>
+#include <QMenuBar>
+#include <QAction>
+#include <QMessageBox>
 
 class MainWindow : public QMainWindow {
     Q_OBJECT
@@ -21,6 +25,10 @@ protected:
 private slots:
     void toggleCursorVisibility();
 
+private slots:
+    void openFile();
+    void saveFile();
+
 private:
     bool cursorVisible;
     QTimer *cursorTimer;
@@ -33,11 +41,9 @@ private:
 
     QString cachedText;
 
-    // Vertical scrolling
     int scrollOffset = 0;  
     int visibleLines = 0;  
 
-    // ✅ Horizontal scrolling
     int hScrollOffset = 0;
     int visibleCols = 0;
 
@@ -46,7 +52,7 @@ private:
     int  computeCursorIndexFromMouse(int x, int y);
 
     void finalizeCursorMove();
-    void scrollToCursor();   // ✅ Will now handle both directions
+    void scrollToCursor();
 };
 
 #endif

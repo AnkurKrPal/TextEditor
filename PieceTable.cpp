@@ -275,6 +275,7 @@ int PieceTable::predecessor(pieceNode* node, pieceNode* &t, int i){
     return 1;
 }
 void PieceTable::deletion(int index , int typee){
+    cout<<"DELETION FOR "<<index<<endl;
     if(state==1){
         weightUpdator(head,currIndex);
         state=2;
@@ -337,7 +338,7 @@ void PieceTable::deletion(int index , int typee){
             current_piece->length--;
             deletedChar=(current_piece->source==ADD)?addString[current_piece->start+current_piece->length]:originalString[current_piece->start+current_piece->length];
             GlobalIndex--;
-            currIndex--;
+            currIndex=GlobalIndex;
         }
 
         if(typee==0){

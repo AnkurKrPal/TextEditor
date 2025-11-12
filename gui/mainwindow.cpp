@@ -7,7 +7,6 @@
 
 #include "../PieceTable.h"
 
-//External backend objects
 PieceTable P;
 int currCursor = 0;
 
@@ -34,6 +33,28 @@ MainWindow::MainWindow(QWidget *parent)
     cursorTimer->start(500);
 
     cachedText = "";
+
+    QMenuBar *menuBar = new QMenuBar(this);
+    setMenuBar(menuBar);
+
+    menuBar->setStyleSheet(
+    "QMenuBar { background-color: #f0f0f0; color: #202020; border-bottom: 1px solid #ccc; }"
+    "QMenuBar::item:selected { background-color: #dcdcdc; }"
+    "QMenu { background-color: white; color: black; }"
+    );
+
+
+    QMenu *fileMenu = menuBar->addMenu("File");
+
+    QAction *openAction = new QAction("Open", this);
+    QAction *saveAction = new QAction("Save", this);
+
+    connect(openAction, &QAction::triggered, this, &MainWindow::openFile);
+    connect(saveAction, &QAction::triggered, this, &MainWindow::saveFile);
+
+    fileMenu->addAction(openAction);
+    fileMenu->addAction(saveAction);
+
 }
 
 MainWindow::~MainWindow() {}
@@ -55,13 +76,15 @@ void MainWindow::paintEvent(QPaintEvent *event) {
     for (int i = scrollOffset; i < std::min(scrollOffset + visibleLines, total); ++i) {
         QString line = lines[i];
 
-        // ✅ Only draw the part of the line currently visible horizontally
         QString visiblePart;
         if (hScrollOffset < line.length()) {
             visiblePart = line.mid(hScrollOffset, visibleCols);
         }
 
-        painter.drawText(0, (i - scrollOffset + 1) * cellHeight, visiblePart);
+        int topMargin = menuBar()->height() + cellHeight; 
+        painter.drawText(0, topMargin + (i - scrollOffset) * cellHeight, visiblePart);
+
+
     }
 
     drawCursor(painter);
@@ -71,16 +94,21 @@ void MainWindow::paintEvent(QPaintEvent *event) {
 void MainWindow::drawCursor(QPainter &painter) {
     if (!cursorVisible) return;
 
-    int x = (cursorCol - hScrollOffset) * cellWidth;
-    int y = (cursorRow - scrollOffset) * cellHeight;
+    QStringList lines = cachedText.split('\n');
+    if (cursorRow < 0 || cursorRow >= lines.size()) return;
 
-    // Do not draw cursor if it's outside visible region horizontally
-    if (x < 0 || x > width()) return;
+    QString line = lines[cursorRow];
+    QFontMetrics metrics(font());
+
+    int x = metrics.horizontalAdvance(line.left(cursorCol - hScrollOffset));
+    int y = menuBar()->height() + cellHeight + (cursorRow - scrollOffset) * cellHeight;
+
 
     painter.setPen(Qt::NoPen);
     painter.setBrush(Qt::black);
-    painter.drawRect(x, y, 2, cellHeight);
+    painter.drawRect(x, y - cellHeight, 2, cellHeight);
 }
+
 
 
 void MainWindow::toggleCursorVisibility() {
@@ -135,13 +163,11 @@ void MainWindow::scrollToCursor() {
     visibleLines = height() / cellHeight;
     visibleCols  = width()  / cellWidth;
 
-    //Vertical scroll
     if (cursorRow < scrollOffset)
         scrollOffset = cursorRow;
     if (cursorRow >= scrollOffset + visibleLines)
         scrollOffset = cursorRow - visibleLines + 1;
 
-    // Horizontal scroll
     if (cursorCol < hScrollOffset)
         hScrollOffset = cursorCol;
     if (cursorCol >= hScrollOffset + visibleCols)
@@ -168,7 +194,6 @@ void MainWindow::wheelEvent(QWheelEvent *event) {
 
 void MainWindow::keyPressEvent(QKeyEvent *event)
 {
-    // Arrow keys
     if (event->key() == Qt::Key_Left) {
         if (currCursor > 0){ currCursor--;P.GlobalIndex--;}
         finalizeCursorMove();
@@ -206,7 +231,6 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
         updateCursorPosition(); scrollToCursor(); update(); return;
     }
 
-    // Ctrl+Z Undo / Ctrl+Y Redo
     if (event->modifiers() & Qt::ControlModifier) {
         if (event->key() == Qt::Key_Z) performUndo(P, currCursor);
         else if (event->key() == Qt::Key_Y) performRedo(P, currCursor);
@@ -214,21 +238,18 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
         updateCursorPosition(); scrollToCursor(); update(); return;
     }
 
-    // Enter
     if (event->key() == Qt::Key_Return || event->key() == Qt::Key_Enter) {
         insertChar(P, '\n', currCursor);
         cachedText = QString::fromStdString(P.printTrial(P.head));
         updateCursorPosition(); scrollToCursor(); update(); return;
     }
 
-    // Backspace
     if (event->key() == Qt::Key_Backspace) {
         if (currCursor > 0) { if (P.state != 2) P.delCount = 0; P.delCount++; P.deletion(currCursor, 0); currCursor--; }
         cachedText = QString::fromStdString(P.printTrial(P.head));
         updateCursorPosition(); scrollToCursor(); update(); return;
     }
 
-    // Character input
     QString t = event->text();
     if (t.size() == 1) {
         char c = t.toLatin1()[0];
@@ -237,7 +258,64 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
             cachedText = QString::fromStdString(P.printTrial(P.head));
             updateCursorPosition(); scrollToCursor(); update(); return;
         }
+    }        
+}
+
+void MainWindow::openFile() {
+    QString fileName = QFileDialog::getOpenFileName(this, "Open File", "", "Text Files (*.txt);;All Files (*)");
+    if (fileName.isEmpty()) return;
+
+    QFile file(fileName);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        QMessageBox::warning(this, "Error", "Cannot open file.");
+        return;
     }
 
-        
+    QTextStream in(&file);
+    cachedText = in.readAll();
+    file.close();
+
+    std::string content = cachedText.toStdString();
+    P.originalString = content;
+    P.addString.clear();
+    P.undo = std::stack<laststep*>();
+    P.redo = std::stack<laststep*>();
+    P.state = 0;
+    P.GlobalIndex = content.length();
+    P.currIndex = P.GlobalIndex;
+    P.delCount = 0;
+    P.length2 = 0;
+    P.current_piece = nullptr;
+
+    if (!content.empty()) {
+        pieceNode* root = new pieceNode(ORIGINAL, 0, content.length());
+        root->weight = 0;
+        root->height = 1;
+        root->left = root->right = nullptr;
+        P.head = root;
+    } else {
+        P.head = nullptr;
+    }
+
+    currCursor = content.length();
+    updateCursorPosition();
+    update();
+}
+
+
+void MainWindow::saveFile() {
+    QString fileName = QFileDialog::getSaveFileName(this, "Save File", "", "Text Files (*.txt);;All Files (*)");
+    if (fileName.isEmpty()) return;
+
+    QFile file(fileName);
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        QMessageBox::warning(this, "Error", "Cannot save file.");
+        return;
+    }
+
+    QTextStream out(&file);
+    out << cachedText;
+    file.close();
+
+    QMessageBox::information(this, "Saved", "File saved successfully!");
 }

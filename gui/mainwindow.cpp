@@ -170,15 +170,13 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
 {
     // Arrow keys
     if (event->key() == Qt::Key_Left) {
+        if (currCursor > 0){ currCursor--;P.GlobalIndex--;}
         finalizeCursorMove();
-        if (currCursor > 0) currCursor--;
-        P.GlobalIndex = currCursor;
         updateCursorPosition(); scrollToCursor(); update(); return;
     }
     if (event->key() == Qt::Key_Right) {
+        if (currCursor < cachedText.length()) {currCursor++;P.GlobalIndex--;}
         finalizeCursorMove();
-        if (currCursor < cachedText.length()) currCursor++;
-        P.GlobalIndex = currCursor;
         updateCursorPosition(); scrollToCursor(); update(); return;
     }
 
@@ -240,4 +238,6 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
             updateCursorPosition(); scrollToCursor(); update(); return;
         }
     }
+
+        
 }

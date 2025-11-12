@@ -165,12 +165,19 @@ void PieceTable::insert(char c, int index , int typee){
             charStack.push_back(c);
         }
     }
-    head = cleanupZeroLength(head);
-    recomputeWeights(head);
-    current_piece = findInd(head, currIndex);
-    if(!current_piece){
-        current_piece = findPredNode(head, currIndex);
-    }
+    // head = cleanupZeroLength(head);
+    // recomputeWeights(head);
+    // current_piece = findInd(head, currIndex);
+    // if(!current_piece){
+    //     current_piece = findPredNode(head, currIndex);
+    // }
+    view(head);
+        cout<<"Current Piece : ";
+        printNode(current_piece);
+        cout<<"  Head : ";
+        printNode(head);
+        cout<<" | state : "<<state<<" | currIndex : "<<currIndex<<"  |  GlobalIndex : "<<GlobalIndex<<"  |  delCount : "<<delCount<<endl;
+        cout<<endl;
 }
 
 pieceNode *PieceTable::createInsert(pieceNode *node, char c, int index, int weightUpdation, int type)
@@ -355,12 +362,19 @@ void PieceTable::deletion(int index , int typee){
         }
     }
 
-    head = cleanupZeroLength(head);
-    recomputeWeights(head);
-    current_piece = findInd(head, currIndex);
-    if(!current_piece){
-        current_piece = findPredNode(head, currIndex);
-    }
+    // head = cleanupZeroLength(head);
+    // recomputeWeights(head);
+    // current_piece = findInd(head, currIndex);
+    // if(!current_piece){
+    //     current_piece = findPredNode(head, currIndex);
+    // }
+    view(head);
+        cout<<"Current Piece : ";
+        printNode(current_piece);
+        cout<<"  Head : ";
+        printNode(head);
+        cout<<" | state : "<<state<<" | currIndex : "<<currIndex<<"  |  GlobalIndex : "<<GlobalIndex<<"  |  delCount : "<<delCount<<endl;
+        cout<<endl;
 }
 pieceNode* PieceTable::newDeletion(pieceNode* node, int index){
     cout<<"newdel called for node"<<node<<endl;

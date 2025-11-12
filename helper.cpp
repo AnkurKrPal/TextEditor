@@ -52,7 +52,8 @@ pieceNode *leftRotate(pieceNode *x)
 
 void PieceTable::printNode(pieceNode *node)
 {
-    if(!node){cout<<"NULL";return;}
+    if(!node){cout<<"NULL";return;
+        }
     if (node->source == ADD){
         for (int i = 0; i < node->length; i++){
             cout << addString[i + node->start];

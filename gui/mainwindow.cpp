@@ -60,6 +60,9 @@ MainWindow::MainWindow(QWidget *parent)
 MainWindow::~MainWindow() {}
 
 void MainWindow::paintEvent(QPaintEvent *event) {
+
+    // draws visible text and cursor
+
     Q_UNUSED(event);
 
     QPainter painter(this);
@@ -92,6 +95,9 @@ void MainWindow::paintEvent(QPaintEvent *event) {
 
 
 void MainWindow::drawCursor(QPainter &painter) {
+
+    // draws blinking cursor block
+
     if (!cursorVisible) return;
 
     QStringList lines = cachedText.split('\n');
@@ -112,20 +118,29 @@ void MainWindow::drawCursor(QPainter &painter) {
 
 
 void MainWindow::toggleCursorVisibility() {
+
+    // toggles cursor blink state
+
     cursorVisible = !cursorVisible;
     update();
 }
 
 void MainWindow::finalizeCursorMove() {
+
+    // finalizes ongoing piece-table edit state
+
     if (P.state == 2) { P.weightUpdator2(P.head, P.currIndex); P.delCount = 0; P.current_piece = NULL; }
     if (P.state == 1) { P.weightUpdator(P.head, P.currIndex);  P.current_piece = NULL; }
-    if (P.length2 > 0) P.undo.push(new laststep(P.type2,  P.length2, P.cursorStart, P.charStack));
-    P.length2 = 0;
+    if (P.lastStepLength > 0) P.undo.push(new laststep(P.undoType,  P.lastStepLength, P.cursorStart, P.charStack));
+    P.lastStepLength = 0;
     P.state   = 0;
     P.GlobalIndex = currCursor;
 }
 
 void MainWindow::updateCursorPosition() {
+
+    // updates cursor row/col from global index
+
     cursorRow = cursorCol = 0;
     QStringList lines = cachedText.split('\n');
     int index = currCursor;
@@ -137,6 +152,9 @@ void MainWindow::updateCursorPosition() {
 }
 
 int MainWindow::computeCursorIndexFromMouse(int x, int y) {
+
+    // maps mouse click position to text index
+
     int topMargin = menuBar()->height();
     int row = (y - topMargin) / cellHeight + scrollOffset;
 
@@ -158,6 +176,9 @@ int MainWindow::computeCursorIndexFromMouse(int x, int y) {
 
 
 void MainWindow::mousePressEvent(QMouseEvent *event) {
+
+    // handles cursor movement on mouse click
+
     finalizeCursorMove();
     currCursor = computeCursorIndexFromMouse(event->position().x(), event->position().y());
     P.GlobalIndex = currCursor;
@@ -167,14 +188,19 @@ void MainWindow::mousePressEvent(QMouseEvent *event) {
 }
 
 void MainWindow::scrollToCursor() {
+
+    // auto-scrolls viewport to keep cursor visible
+
     visibleLines = height() / cellHeight;
     visibleCols  = width()  / cellWidth;
 
+    // vertical auto-scroll
     if (cursorRow < scrollOffset)
         scrollOffset = cursorRow;
     if (cursorRow >= scrollOffset + visibleLines)
         scrollOffset = cursorRow - visibleLines + 1;
 
+    // horizontal auto-scroll
     if (cursorCol < hScrollOffset)
         hScrollOffset = cursorCol;
     if (cursorCol >= hScrollOffset + visibleCols)
@@ -188,6 +214,9 @@ void MainWindow::scrollToCursor() {
 
 
 void MainWindow::wheelEvent(QWheelEvent *event) {
+
+    // vertical scroll using mouse wheel
+
     scrollOffset -= (event->angleDelta().y() > 0 ? 1 : -1);
     QStringList lines = cachedText.split('\n');
     int total = (int)lines.size();
@@ -201,6 +230,8 @@ void MainWindow::wheelEvent(QWheelEvent *event) {
 
 void MainWindow::keyPressEvent(QKeyEvent *event)
 {
+    // handles typing, navigation, undo/redo
+
     if (event->key() == Qt::Key_Left) {
         if (currCursor > 0){ currCursor--;P.GlobalIndex--;}
         finalizeCursorMove();
@@ -238,6 +269,7 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
         updateCursorPosition(); scrollToCursor(); update(); return;
     }
 
+    // --- undo/redo ---
     if (event->modifiers() & Qt::ControlModifier) {
         if (event->key() == Qt::Key_Z) performUndo(P, currCursor);
         else if (event->key() == Qt::Key_Y) performRedo(P, currCursor);
@@ -245,18 +277,21 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
         updateCursorPosition(); scrollToCursor(); update(); return;
     }
 
+    // --- enter key ---
     if (event->key() == Qt::Key_Return || event->key() == Qt::Key_Enter) {
         insertChar(P, '\n', currCursor);
         cachedText = QString::fromStdString(P.printTrial(P.head));
         updateCursorPosition(); scrollToCursor(); update(); return;
     }
 
+    // --- backspace ---
     if (event->key() == Qt::Key_Backspace) {
         if (currCursor > 0) { if (P.state != 2) P.delCount = 0; P.delCount++; P.deletion(currCursor, 0); currCursor--; }
         cachedText = QString::fromStdString(P.printTrial(P.head));
         updateCursorPosition(); scrollToCursor(); update(); return;
     }
 
+    // --- printable characters ---
     QString t = event->text();
     if (t.size() == 1) {
         char c = t.toLatin1()[0];
@@ -269,6 +304,9 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
 }
 
 void MainWindow::openFile() {
+
+    // loads file into editor and rebuilds piece table
+
     QString fileName = QFileDialog::getOpenFileName(this, "Open File", "", "Text Files (*.txt);;All Files (*)");
     if (fileName.isEmpty()) return;
 
@@ -291,7 +329,7 @@ void MainWindow::openFile() {
     P.GlobalIndex = content.length();
     P.currIndex = P.GlobalIndex;
     P.delCount = 0;
-    P.length2 = 0;
+    P.lastStepLength = 0;
     P.current_piece = nullptr;
 
     if (!content.empty()) {
@@ -311,6 +349,9 @@ void MainWindow::openFile() {
 
 
 void MainWindow::saveFile() {
+
+    // saves current text buffer to file
+    
     QString fileName = QFileDialog::getSaveFileName(this, "Save File", "", "Text Files (*.txt);;All Files (*)");
     if (fileName.isEmpty()) return;
 

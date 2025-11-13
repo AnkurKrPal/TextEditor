@@ -9,6 +9,7 @@ At its core, it uses a **Piece Table** integrated with an **AVL Tree**, providin
 
 * Fast, memory-efficient text editing
 * Handles large files easily
+* Undo / Redo functionality
 * Open / Save functionality
 * Keyboard-based navigation (arrows, Enter, Backspace)
 * Mouse cursor movement with live updates
@@ -80,7 +81,8 @@ AVL Trees ensure the editor remains efficient even with thousands of edits:
 
 The editor uses **two stacks** for undo and redo operations:  
 one for tracking edits (undo stack) and another for reverted actions (redo stack).  
-Each insert/delete pushes metadata onto the stacks, enabling **O(k log(n))** undo/redo with full edit history.
+Each insert/delete pushes metadata onto the stacks, enabling undo/redo with full edit history.
+Each undo/redo step internally performs AVL-based insert/delete operations, resulting in **O(k log n)** for reversing k edits.
 
 > Simple stack-based design ensures fast, reliable undo/redo without affecting performance.
 
@@ -122,6 +124,18 @@ make
 * Edits modify only metadata (pointers and lengths).
 * Cursor movements and inserts are logarithmic in complexity.
 * The AVL structure ensures consistent speed even after thousands of edits.
+
+---
+
+## 🧮 Time Complexity Summary
+
+| Operation   | Complexity | Description                         |
+|-------------|------------|-------------------------------------|
+| Insert      | O(log n)   | Balanced AVL insertion              |
+| Delete      | O(log n)   | Weight rebalancing on deletion      |
+| Undo/Redo   | O(k log n) | Reverts k edits using AVL operations|
+| Cursor Move | O(log n)   | Index-based navigation              |
+| Rendering   | O(V × H)   | Visible lines × characters          |
 
 ---
 

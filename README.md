@@ -78,11 +78,11 @@ AVL Trees ensure the editor remains efficient even with thousands of edits:
 
 ## 🔄 Undo / Redo Support
 
-The editor uses **two stacks** to manage undo and redo operations:  
-one for tracking edits and another for reverted actions.  
-Each insert or delete stores metadata describing the affected pieces, allowing efficient reversal of changes.
+The editor uses **two stacks** for undo and redo operations:  
+one for tracking edits (undo stack) and another for reverted actions (redo stack).  
+Each insert/delete pushes metadata onto the stacks, enabling **O(k log(n))** undo/redo with full edit history.
 
-> Stack-based design provides reliable multi-level undo/redo with minimal overhead.
+> Simple stack-based design ensures fast, reliable undo/redo without affecting performance.
 
 ---
 

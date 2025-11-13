@@ -97,11 +97,10 @@ Each undo/redo step internally performs AVL-based insert/delete operations, resu
 
 ### Steps
 
-```bash
-mkdir build && cd build
-qmake ../
-make
-./TextEditor
+```
+In Command Palette (Ctrl + Shift + P) run these commands:
+CMake: Build
+Cmake: Run Without Debugging
 ```
 
 ---
@@ -148,13 +147,5 @@ make
 - Scales linearly with file size, while maintaining constant-time user interaction.
 
 > In short — this editor achieves **modern IDE-level responsiveness** using pure **DSA principles**.
-
----
-
-## Authors
-
-* **Prajwal Patil**
-* **Sajidhussain Agharia**
-* **Ankur Kumar Pal**
 
 ---

@@ -1,7 +1,7 @@
 #ifndef PIECETABLE_H
 #define PIECETABLE_H
 
-#include<bits/stdc++.h>
+#include <bits/stdc++.h>
 using namespace std;
 
 enum BufferType
@@ -23,11 +23,11 @@ struct laststep
     long long cursorStart;
     vector<char> charStack;
 
-    laststep(undoBufferType cmmd  , long long lngth , long long cursorStrt , vector<char> charstack)
+    laststep(undoBufferType cmmd, long long lngth, long long cursorStrt, vector<char> charstack)
     {
         command = cmmd;
         lastStepLength = lngth;
-        cursorStart = cursorStrt ;
+        cursorStart = cursorStrt;
         charStack = charstack;
     }
 };
@@ -57,62 +57,59 @@ struct pieceNode
 class PieceTable
 {
 
-    public:
-        
-        pieceNode *current_piece = NULL;
-        
-        string originalString = "";
-        
-        pieceNode *head=NULL;
-        
-        string addString = "";
-        
-        int state = 0;
-        
-        int GlobalIndex = 0;
-        
-        int currIndex ;
-        
-        int delCount = 0;
+public:
+    pieceNode *current_piece = NULL;
 
-        long long lastStepLength;
-        
-        long long cursorStart;
-        
-        vector<char> charStack ;
-        
-        undoBufferType undoType;
-        
-        stack <laststep*> undo ;
-        
-        stack <laststep*> redo ;
-        char deletedChar ;
+    string originalString = "";
 
+    pieceNode *head = NULL;
 
-        int weightUpdator(pieceNode* node, int index);
-        
-        pieceNode * AVLDeletion(pieceNode* node, int index, pieceNode* type=NULL);
-        
-        int predecessor(pieceNode* node, pieceNode* &t, int i);
-        
-        void weightUpdator2(pieceNode* node, int index);
-        
-        void insert(char c, int index , int lastStepType);
-        
-        void deletion(int index , int lastStepType);
-        
-        pieceNode* newDeletion(pieceNode *node, int index);
-        
-        pieceNode *balanceFunction(pieceNode *node, int index);
+    string addString = "";
 
-        pieceNode *createInsert(pieceNode *node, char c, int index, int weightUpdation, int type);
-        
-        std::string printTrial(pieceNode* node);
-        
-        void undofn();
-        
-        void redofn();
+    int state = 0;
 
+    int GlobalIndex = 0;
+
+    int currIndex;
+
+    int delCount = 0;
+
+    long long lastStepLength;
+
+    long long cursorStart;
+
+    vector<char> charStack;
+
+    undoBufferType undoType;
+
+    stack<laststep *> undo;
+
+    stack<laststep *> redo;
+    char deletedChar;
+
+    int weightUpdator(pieceNode *node, int index);
+
+    pieceNode *AVLDeletion(pieceNode *node, int index, pieceNode *type = NULL);
+
+    int predecessor(pieceNode *node, pieceNode *&t, int i);
+
+    void weightUpdator2(pieceNode *node, int index);
+
+    void insert(char c, int index, int lastStepType);
+
+    void deletion(int index, int lastStepType);
+
+    pieceNode *newDeletion(pieceNode *node, int index);
+
+    pieceNode *balanceFunction(pieceNode *node, int index);
+
+    pieceNode *createInsert(pieceNode *node, char c, int index, int weightUpdation, int type);
+
+    std::string printTrial(pieceNode *node);
+
+    void undofn();
+
+    void redofn();
 };
 
 int height(pieceNode *Node);
@@ -125,7 +122,7 @@ pieceNode *leftRotate(pieceNode *x);
 
 void insertChar(PieceTable &P, char c, int &cursor);
 
-void deleteChar(PieceTable P, int &cursor);
+void deleteChar(PieceTable &P, int &cursor);
 
 void performUndo(PieceTable &P, int &cursor);
 

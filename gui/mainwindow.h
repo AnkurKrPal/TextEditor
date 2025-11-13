@@ -9,7 +9,8 @@
 #include <QAction>
 #include <QMessageBox>
 
-class MainWindow : public QMainWindow {
+class MainWindow : public QMainWindow
+{
     Q_OBJECT
 
 public:
@@ -41,15 +42,15 @@ private:
 
     QString cachedText;
 
-    int scrollOffset = 0;  
-    int visibleLines = 0;  
+    int scrollOffset = 0;
+    int visibleLines = 0;
 
     int hScrollOffset = 0;
     int visibleCols = 0;
 
     void drawCursor(QPainter &painter);
     void updateCursorPosition();
-    int  computeCursorIndexFromMouse(int x, int y);
+    int computeCursorIndexFromMouse(int x, int y);
 
     void finalizeCursorMove();
     void scrollToCursor();

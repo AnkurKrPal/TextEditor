@@ -117,7 +117,7 @@ make
 ## 👨‍💻 Authors
 
 **Prajwal Patil**
-**Sajidhussain Agharia**
-**Ankur Kumar Pal**
+* **Sajidhussain Agharia**
+* **Ankur Kumar Pal**
 
 ---

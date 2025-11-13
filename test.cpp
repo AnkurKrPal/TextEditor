@@ -28,8 +28,8 @@ int main(){
                 P.weightUpdator(P.head , P.currIndex);
                 P.current_piece=NULL;
             }
-            if(P.length2>0) P.undo.push(new laststep(P.type2  , P.length2 , P.cursorStart , P.charStack));
-            P.length2=0;
+            if(P.lastStepLength>0) P.undo.push(new laststep(P.undoType  , P.lastStepLength , P.cursorStart , P.charStack));
+            P.lastStepLength=0;
             
             P.state=0;
         }else if(c=='6'){       //right
@@ -40,13 +40,13 @@ int main(){
                 P.weightUpdator(P.head , P.currIndex);
                 P.current_piece=NULL;
             }
-            if(P.length2>0) P.undo.push(new laststep(P.type2 , P.length2 , P.cursorStart , P.charStack));
-            P.length2=0;
+            if(P.lastStepLength>0) P.undo.push(new laststep(P.undoType , P.lastStepLength , P.cursorStart , P.charStack));
+            P.lastStepLength=0;
 
             P.state=0;
         }else if(c=='8'){        //undo
-            if(P.length2>0) P.undo.push(new laststep(P.type2  , P.length2 , P.cursorStart , P.charStack));
-            P.length2=0;
+            if(P.lastStepLength>0) P.undo.push(new laststep(P.undoType  , P.lastStepLength , P.cursorStart , P.charStack));
+            P.lastStepLength=0;
             if(P.state==2){P.weightUpdator2(P.head,P.currIndex);P.delCount=0;P.current_piece=NULL;}
             if(P.state==1){
                 P.weightUpdator(P.head , P.currIndex);
@@ -65,8 +65,8 @@ int main(){
             P.state=0;
             cursor=P.GlobalIndex;
         }else if(c=='9'){
-            if(P.length2>0) P.undo.push(new laststep(P.type2  , P.length2 , P.cursorStart , P.charStack));
-            P.length2=0;
+            if(P.lastStepLength>0) P.undo.push(new laststep(P.undoType  , P.lastStepLength , P.cursorStart , P.charStack));
+            P.lastStepLength=0;
             if(P.state==2){P.weightUpdator2(P.head,P.currIndex);P.delCount=0;P.current_piece=NULL;}
             if(P.state==1){
                 P.weightUpdator(P.head , P.currIndex);

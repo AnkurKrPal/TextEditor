@@ -119,8 +119,8 @@ void MainWindow::toggleCursorVisibility() {
 void MainWindow::finalizeCursorMove() {
     if (P.state == 2) { P.weightUpdator2(P.head, P.currIndex); P.delCount = 0; P.current_piece = NULL; }
     if (P.state == 1) { P.weightUpdator(P.head, P.currIndex);  P.current_piece = NULL; }
-    if (P.length2 > 0) P.undo.push(new laststep(P.type2,  P.length2, P.cursorStart, P.charStack));
-    P.length2 = 0;
+    if (P.lastStepLength > 0) P.undo.push(new laststep(P.undoType,  P.lastStepLength, P.cursorStart, P.charStack));
+    P.lastStepLength = 0;
     P.state   = 0;
     P.GlobalIndex = currCursor;
 }
@@ -291,7 +291,7 @@ void MainWindow::openFile() {
     P.GlobalIndex = content.length();
     P.currIndex = P.GlobalIndex;
     P.delCount = 0;
-    P.length2 = 0;
+    P.lastStepLength = 0;
     P.current_piece = nullptr;
 
     if (!content.empty()) {

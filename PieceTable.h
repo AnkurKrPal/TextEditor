@@ -10,7 +10,7 @@ enum BufferType
     ADD
 };
 
-enum BufferType2
+enum undoBufferType
 {
     addition,
     subtraction
@@ -18,17 +18,15 @@ enum BufferType2
 
 struct laststep
 {
-    BufferType2 command;
-    // long long start2;
-    long long length2;
+    undoBufferType command;
+    long long lastStepLength;
     long long cursorStart;
     vector<char> charStack;
 
-    laststep(BufferType2 cmmd  , long long lngth , long long cursorStrt , vector<char> charstack)
+    laststep(undoBufferType cmmd  , long long lngth , long long cursorStrt , vector<char> charstack)
     {
         command = cmmd;
-        // start2 = strt;
-        length2 = lngth;
+        lastStepLength = lngth;
         cursorStart = cursorStrt ;
         charStack = charstack;
     }
@@ -72,11 +70,10 @@ class PieceTable
         
         void undofn();
         void redofn();
-        // long long start2;
-        long long length2;
+        long long lastStepLength;
         long long cursorStart;
         vector<char> charStack ;
-        BufferType2 type2;
+        undoBufferType undoType;
         stack <laststep*> undo ;
         stack <laststep*> redo ;
         char deletedChar ;
@@ -86,8 +83,8 @@ class PieceTable
         int predecessor(pieceNode* node, pieceNode* &t, int i);
         // void printNode(pieceNode* node);
         void weightUpdator2(pieceNode* node, int index);
-        void insert(char c, int index , int typee);
-        void deletion(int index , int typee);
+        void insert(char c, int index , int lastStepType);
+        void deletion(int index , int lastStepType);
         pieceNode* newDeletion(pieceNode *node, int index);
         pieceNode *balanceFunction(pieceNode *node, int index);
         pieceNode *createInsert(pieceNode *node, char c, int index, int weightUpdation, int type);
@@ -97,8 +94,8 @@ class PieceTable
 
 };
 
-int height(pieceNode *N);
-int getBalance(pieceNode *N);
+int height(pieceNode *Node);
+int getBalance(pieceNode *Node);
 pieceNode *rightRotate(pieceNode *y);
 pieceNode *leftRotate(pieceNode *x);
 void insertChar(PieceTable &P, char c, int &cursor);

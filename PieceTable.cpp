@@ -16,82 +16,82 @@ static void recomputeWeights(pieceNode* n){
     n->weight=subChar(n->left);
     n->height=1+max(height(n->left),height(n->right));
 }
-static pieceNode* findInd(pieceNode* node, int i){
-    while(node){
-        if(i<0) return NULL;
-        if(i<=node->weight){
-            node= node->left;
-        }else if(i >= node->weight + node->length){
-            i -= node->weight+ node->length;
-            node= node->right;
-        }else{
-            return node;
-        }
-    }
-    return NULL;
-}
+// static pieceNode* findInd(pieceNode* node, int i){
+//     while(node){
+//         if(i<0) return NULL;
+//         if(i<=node->weight){
+//             node= node->left;
+//         }else if(i >= node->weight + node->length){
+//             i -= node->weight+ node->length;
+//             node= node->right;
+//         }else{
+//             return node;
+//         }
+//     }
+//     return NULL;
+// }
 
-static pieceNode* findPredNode(pieceNode* root, int i){
-    // returns node that ends at or before i-1 (predecessor of i)
-    pieceNode* pred = NULL;
-    pieceNode* cur = root;
-    int k = i;
-    while(cur){
-        if(k <= cur->weight){
-            cur = cur->left;
-        }else if(k >= cur->weight + cur->length){
-            k -= cur->weight + cur->length;
-            pred = cur;
-            cur = cur->right;
-        }else{
-            pieceNode* t = cur->left;
-            while(t && t->right) t = t->right;
-            return t ? t : pred;
-        }
-    }
-    return pred;
-}
+// static pieceNode* findPredNode(pieceNode* root, int i){
+//     // returns node that ends at or before i-1 (predecessor of i)
+//     pieceNode* pred = NULL;
+//     pieceNode* cur = root;
+//     int k = i;
+//     while(cur){
+//         if(k <= cur->weight){
+//             cur = cur->left;
+//         }else if(k >= cur->weight + cur->length){
+//             k -= cur->weight + cur->length;
+//             pred = cur;
+//             cur = cur->right;
+//         }else{
+//             pieceNode* t = cur->left;
+//             while(t && t->right) t = t->right;
+//             return t ? t : pred;
+//         }
+//     }
+//     return pred;
+// }
 
-static pieceNode* cleanupZeroLength(pieceNode* root){
-    if(!root) return NULL;
-    root->left  = cleanupZeroLength(root->left);
-    root->right = cleanupZeroLength(root->right);
-    if(root->length == 0){
-        pieceNode* L = root->left;
-        pieceNode* R = root->right;
-        if(!L && !R){
-            delete root;
-            return NULL;
-        }else if(!L){
-            pieceNode* keep = R;
-            delete root;
-            return keep;
-        }else if(!R){
-            pieceNode* keep = L;
-            delete root;
-            return keep;
-        }else{
-            pieceNode* s = R;
-            while(s->left) s = s->left;
-            root->source = s->source;
-            root->start  = s->start;
-            root->length = s->length;
-            // remove s from right subtree
-            pieceNode* parent = root;
-            pieceNode* cur = root->right;
-            while(cur && cur->left){
-                parent = cur;
-                cur = cur->left;
-            }
-            if(parent == root) parent->right = cur->right;
-            else               parent->left  = cur->right;
-            delete cur;
-        }
-    }
-    root->weight = subChar(root->left);
-    root->height = 1 + max(height(root->left), height(root->right));
-    return root;
-}
+// static pieceNode* cleanupZeroLength(pieceNode* root){
+//     if(!root) return NULL;
+//     root->left  = cleanupZeroLength(root->left);
+//     root->right = cleanupZeroLength(root->right);
+//     if(root->length == 0){
+//         pieceNode* L = root->left;
+//         pieceNode* R = root->right;
+//         if(!L && !R){
+//             delete root;
+//             return NULL;
+//         }else if(!L){
+//             pieceNode* keep = R;
+//             delete root;
+//             return keep;
+//         }else if(!R){
+//             pieceNode* keep = L;
+//             delete root;
+//             return keep;
+//         }else{
+//             pieceNode* s = R;
+//             while(s->left) s = s->left;
+//             root->source = s->source;
+//             root->start  = s->start;
+//             root->length = s->length;
+//             // remove s from right subtree
+//             pieceNode* parent = root;
+//             pieceNode* cur = root->right;
+//             while(cur && cur->left){
+//                 parent = cur;
+//                 cur = cur->left;
+//             }
+//             if(parent == root) parent->right = cur->right;
+//             else               parent->left  = cur->right;
+//             delete cur;
+//         }
+//     }
+//     root->weight = subChar(root->left);
+//     root->height = 1 + max(height(root->left), height(root->right));
+//     return root;
+// }
 
 int PieceTable::weightUpdator(pieceNode* node, int index){
     if(node==current_piece){
@@ -123,7 +123,7 @@ void PieceTable::weightUpdator2(pieceNode* node, int index){
         weightUpdator2(node->right, index-node->weight-node->length);
     }
 }
-void PieceTable::insert(char c, int index , int typee){
+void PieceTable::insert(char c, int index , int lastStepType){
     if (state != 1){   
         
         if(delCount>0){
@@ -139,12 +139,12 @@ void PieceTable::insert(char c, int index , int typee){
         head = createInsert(head, c, index, 1, 0);
         state = 1;
 
-        if(typee==0){
+        if(lastStepType==0){
             
-            if(length2>0)undo.push(new laststep(type2  , length2 , cursorStart , charStack));
-            type2 = addition;
+            if(lastStepLength>0)undo.push(new laststep(undoType  , lastStepLength , cursorStart , charStack));
+            undoType = addition;
             // start2 = addString.length() - 1;
-            length2 = 1;
+            lastStepLength = 1;
             cursorStart = GlobalIndex - 1;
             charStack.clear();
             charStack.push_back(c);
@@ -160,8 +160,8 @@ void PieceTable::insert(char c, int index , int typee){
         addString.push_back(c);
 
 
-        if(typee==0){
-            length2++;
+        if(lastStepType==0){
+            lastStepLength++;
             charStack.push_back(c);
         }
     }
@@ -274,7 +274,7 @@ int PieceTable::predecessor(pieceNode* node, pieceNode* &t, int i){
     }
     return 1;
 }
-void PieceTable::deletion(int index , int typee){
+void PieceTable::deletion(int index , int lastStepType){
     // cout<<"DELETION FOR "<<index<<endl;
     if(state==1){
         weightUpdator(head,currIndex);
@@ -304,12 +304,12 @@ void PieceTable::deletion(int index , int typee){
         }
         
 
-        if(typee==0){
-            if(length2>0)undo.push(new laststep(type2 , length2 , cursorStart, charStack));
+        if(lastStepType==0){
+            if(lastStepLength>0)undo.push(new laststep(undoType , lastStepLength , cursorStart, charStack));
             charStack.clear();
-            type2 = subtraction;
+            undoType = subtraction;
             // start2 = addString.length();
-            length2 = 1;
+            lastStepLength = 1;
             cursorStart = GlobalIndex+1;
             charStack.push_back(deletedChar);
 
@@ -341,8 +341,8 @@ void PieceTable::deletion(int index , int typee){
             currIndex=GlobalIndex;
         }
 
-        if(typee==0){
-            length2++;
+        if(lastStepType==0){
+            lastStepLength++;
             charStack.push_back(deletedChar);
         }
 
@@ -350,12 +350,12 @@ void PieceTable::deletion(int index , int typee){
         head = newDeletion(head,index);
         state=2;
 
-        if(typee==0){
-            if(length2>0)undo.push(new laststep(type2 , length2 , cursorStart , charStack));
+        if(lastStepType==0){
+            if(lastStepLength>0)undo.push(new laststep(undoType , lastStepLength , cursorStart , charStack));
             charStack.clear();
-            type2 = subtraction;
+            undoType = subtraction;
             // start2 = addString.length();
-            length2 = 1;
+            lastStepLength = 1;
             cursorStart = GlobalIndex+1;
             charStack.push_back(deletedChar);
 
@@ -556,17 +556,17 @@ pieceNode *PieceTable::balanceFunction(pieceNode *node, int index)
     return node;
 };
 void PieceTable::undofn(){
-    if(length2>0) undo.push(new laststep(type2  , length2 , cursorStart , charStack));
-    length2=0;
+    if(lastStepLength>0) undo.push(new laststep(undoType  , lastStepLength , cursorStart , charStack));
+    lastStepLength=0;
     if(undo.empty())return;
     laststep* latest = undo.top();
     
 
     if(latest->command == addition){
-        int cursor2 = latest->length2 + latest->cursorStart ;
+        int cursor2 = latest->lastStepLength + latest->cursorStart ;
         GlobalIndex = cursor2;
 
-        for(int i=0; i<latest->length2 ;i++){
+        for(int i=0; i<latest->lastStepLength ;i++){
             if(state!=2)delCount=0;
             delCount++;
             // cout<<"## : "<<cursor2<<endl;
@@ -588,18 +588,18 @@ void PieceTable::undofn(){
     }
 
     else if(latest->command == subtraction){
-        int cursor2 = latest->cursorStart - latest->length2;
+        int cursor2 = latest->cursorStart - latest->lastStepLength;
         GlobalIndex = cursor2;
 
-        for(int i=0 ; i< latest->length2 ; i++){
-            insert(latest->charStack[latest->length2 - 1 - i] , cursor2 ,1);
+        for(int i=0 ; i< latest->lastStepLength ; i++){
+            insert(latest->charStack[latest->lastStepLength - 1 - i] , cursor2 ,1);
             cursor2++;
         }
 
         redo.push(latest);
         undo.pop();
     }
-    length2=0;
+    lastStepLength=0;
     
 }
 void PieceTable::redofn(){
@@ -611,7 +611,7 @@ void PieceTable::redofn(){
         int cursor2 = latest->cursorStart ; 
         GlobalIndex = cursor2 ;
 
-        for(int i=0; i<latest->length2 ;i++){
+        for(int i=0; i<latest->lastStepLength ;i++){
             if(state!=2)delCount=0;
             delCount++;
             deletion(cursor2,1);
@@ -628,7 +628,7 @@ void PieceTable::redofn(){
         GlobalIndex = cursor2;
         // cout<<cursor2<< ": this is cursor2"<<endl ;
 
-        for(int i=0 ; i< latest->length2 ; i++){
+        for(int i=0 ; i< latest->lastStepLength ; i++){
             insert(latest->charStack[i], cursor2 ,1);
             cursor2++;
         }

@@ -1,18 +1,18 @@
-# 🧩 Superfast Text Editor — Powered by Piece Table + AVL Tree
+# Superfast Text Editor — Powered by Piece Table + AVL Tree
 
 A **high-performance text editor** built using C++ and Qt, designed to handle large files efficiently with **instant editing** and **smooth cursor movement**.
 At its core, it uses a **Piece Table** integrated with an **AVL Tree**, providing extremely fast insertions and deletions without copying large amounts of text.
 
 ---
 
-## 🚀 Key Features
+## Key Features
 
-* 📝 Fast, memory-efficient text editing
-* ⚡ Handles large files easily
-* 💾 Open / Save functionality
-* ⌨️ Keyboard-based navigation (arrows, Enter, Backspace)
-* 🖱️ Mouse cursor movement with live updates
-* 🪶 Lightweight UI built using Qt
+* Fast, memory-efficient text editing
+* Handles large files easily
+* Open / Save functionality
+* Keyboard-based navigation (arrows, Enter, Backspace)
+* Mouse cursor movement with live updates
+* Lightweight UI built using Qt
 
 ---
 
@@ -35,7 +35,8 @@ struct pieceNode {
     size_t start;        // start index in the buffer
     size_t length;       // number of characters
     pieceNode *left, *right;
-    int weight, height;  // AVL balancing fields
+    int height;  // AVL balancing field
+    int weight;  // Number of characters in the left subtree
 };
 ```
 
@@ -47,7 +48,7 @@ This approach ensures:
 
 ---
 
-### 🌳 AVL Tree Integration
+### AVL Tree Integration
 
 The Piece Table’s pieces are stored inside a **self-balancing AVL tree**:
 
@@ -114,9 +115,9 @@ make
 
 ---
 
-## 👨‍💻 Authors
+## Authors
 
-**Prajwal Patil**
+* **Prajwal Patil**
 * **Sajidhussain Agharia**
 * **Ankur Kumar Pal**
 

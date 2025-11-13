@@ -64,7 +64,7 @@ int main(){
             }
             P.state=0;
             cursor=P.GlobalIndex;
-        }else if(c=='9'){
+        }else if(c=='9'){       //redo
             if(P.lastStepLength>0) P.undo.push(new laststep(P.undoType  , P.lastStepLength , P.cursorStart , P.charStack));
             P.lastStepLength=0;
             if(P.state==2){P.weightUpdator2(P.head,P.currIndex);P.delCount=0;P.current_piece=NULL;}
@@ -85,12 +85,5 @@ int main(){
             P.state=0;
             cursor=P.GlobalIndex;
         }
-        // P.view(P.head);
-        // cout<<"Current Piece : ";
-        // P.printNode(P.current_piece);
-        // cout<<"  Head : ";
-        // P.printNode(P.head);
-        // cout<<" | state : "<<P.state<<" | currIndex : "<<P.currIndex<<"  |  GlobalIndex : "<<P.GlobalIndex<<"  |  delCount : "<<P.delCount<<endl;
-        // cout<<endl;
     }
 }

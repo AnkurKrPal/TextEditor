@@ -1,4 +1,4 @@
-# Superfast Text Editor — Powered by Piece Table + AVL Tree
+# Superfast Text Editor - Powered by Piece Table + AVL Tree
 
 A **high-performance text editor** built using C++ and Qt, designed to handle large files efficiently with **instant editing** and **smooth cursor movement**.
 At its core, it uses a **Piece Table** integrated with an **AVL Tree**, providing extremely fast insertions and deletions without copying large amounts of text.
@@ -76,6 +76,16 @@ AVL Trees ensure the editor remains efficient even with thousands of edits:
 
 ---
 
+## 🔄 Undo / Redo Support
+
+The editor uses **two stacks** to manage undo and redo operations:  
+one for tracking edits and another for reverted actions.  
+Each insert or delete stores metadata describing the affected pieces, allowing efficient reversal of changes.
+
+> Stack-based design provides reliable multi-level undo/redo with minimal overhead.
+
+---
+
 ## 🛠️ Build Instructions
 
 ### Requirements
@@ -112,6 +122,18 @@ make
 * Edits modify only metadata (pointers and lengths).
 * Cursor movements and inserts are logarithmic in complexity.
 * The AVL structure ensures consistent speed even after thousands of edits.
+
+---
+
+## ⚡ Why This Approach is Optimal
+
+- Unlike traditional buffer-based editors that rewrite large chunks of text,  
+  this editor only **modifies structural metadata** (Piece Table + AVL nodes).
+- **No character copying** on insert/delete operations.
+- **Balanced tree indexing** ensures predictable logarithmic performance.
+- Scales linearly with file size, while maintaining constant-time user interaction.
+
+> In short — this editor achieves **modern IDE-level responsiveness** using pure **DSA principles**.
 
 ---
 

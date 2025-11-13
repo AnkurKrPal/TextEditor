@@ -1,6 +1,6 @@
 #include <QApplication>
 #include "mainwindow.h"
-#include "../PieceTable.h"
+#include "../src/PieceTable.h"
 
 int main(int argc, char *argv[])
 {

@@ -1,5 +1,10 @@
-a
-a.exe
-org.txt
+# Build files
+*.exe
+*.dSYM/
+*.app
+
+# Qt
 build/
 gui/CMakeLists.txt
+# VSCode
+.vscode/

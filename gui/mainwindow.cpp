@@ -5,7 +5,7 @@
 #include <QWheelEvent>
 #include <QDebug>
 
-#include "../PieceTable.h"
+#include "../src/PieceTable.h"
 
 PieceTable P;
 int currCursor = 0;

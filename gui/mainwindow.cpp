@@ -233,7 +233,7 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
     // handles typing, navigation, undo/redo
 
     if (event->key() == Qt::Key_Left) {
-        if (currCursor > 0){ currCursor--;P.GlobalIndex--;}
+        if (currCursor > 0 && P.GlobalIndex > 0){ currCursor--;P.GlobalIndex--;}
         finalizeCursorMove();
         updateCursorPosition(); scrollToCursor(); update(); return;
     }
@@ -286,7 +286,13 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
 
     // --- backspace ---
     if (event->key() == Qt::Key_Backspace) {
-        if (currCursor > 0) { if (P.state != 2) P.delCount = 0; P.delCount++; P.deletion(currCursor, 0); currCursor--; }
+        // CRITICAL FIX: Sync currCursor with P.GlobalIndex after deletion
+        if (currCursor > 0 && P.GlobalIndex > 0) { 
+            if (P.state != 2) P.delCount = 0; 
+            P.delCount++; 
+            P.deletion(currCursor, 0); 
+            currCursor = P.GlobalIndex;  // Sync with internal index instead of just decrementing
+        }
         cachedText = QString::fromStdString(P.printTrial(P.head));
         updateCursorPosition(); scrollToCursor(); update(); return;
     }

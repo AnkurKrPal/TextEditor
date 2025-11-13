@@ -18,15 +18,11 @@ static void recomputeWeights(pieceNode* n){
 }
 
 int PieceTable::weightUpdator(pieceNode* node, int index){
-    /*
-    This function updates the weight after insertion operation ends(due to cursor change or deletion started)
-    It calculates value of weightUpdation by length of piece in which characters were inserted minus 1.
-    We subtracted 1 as during first character insertion a new piece was created and weight got updated for it in createInsert function
-    */
+    if(!node) return 0;  // FIX: Handle NULL node
     if(node==current_piece){
         return current_piece->length-1;
     }
-    int weightUpdation;
+    int weightUpdation = 0;  // FIX: Initialize to avoid undefined behavior
     if (index <= node->weight)
     {
         weightUpdation = weightUpdator(node->left, index);
@@ -38,13 +34,9 @@ int PieceTable::weightUpdator(pieceNode* node, int index){
     }
     return weightUpdation;
 }
+
 void PieceTable::weightUpdator2(pieceNode* node, int index){
-     /*
-    This function updates the weight after deletion operation ends(due to cursor change or insertion started)
-    Eligible pieces in path got their weight updated by value of delCount
-    We update value of delCount after every deletion
-    */
-    if(delCount==0||node==current_piece){
+    if(delCount==0||node==current_piece||!node){  // FIX: Add NULL check
         return;
     }
     if (index <= node->weight)
@@ -57,13 +49,8 @@ void PieceTable::weightUpdator2(pieceNode* node, int index){
         weightUpdator2(node->right, index-node->weight-node->length);
     }
 }
+
 void PieceTable::insert(char c, int index , int lastStepType){
-     /*
-    This function is origin of insertion. 
-    state == 1 : Previous operation was insertion
-    state == 2 : Previous operation was deletion
-    state == 0 : Previous operation was NULL or cursor shift
-    */
     if (state != 1){   
         
         if(delCount>0){
@@ -79,7 +66,6 @@ void PieceTable::insert(char c, int index , int lastStepType){
         state = 1;
 
         if(lastStepType==0){
-            
             if(lastStepLength>0)undo.push(new laststep(undoType  , lastStepLength , cursorStart , charStack));
             undoType = addition;
             lastStepLength = 1;
@@ -90,13 +76,11 @@ void PieceTable::insert(char c, int index , int lastStepType){
             while(!redo.empty()) { delete redo.top(); redo.pop(); }
         }
     }
-
     else if (state == 1)
     {
         current_piece->length++;
         GlobalIndex++;
         addString.push_back(c);
-
 
         if(lastStepType==0){
             lastStepLength++;
@@ -107,11 +91,6 @@ void PieceTable::insert(char c, int index , int lastStepType){
 
 pieceNode *PieceTable::createInsert(pieceNode *node, char c, int index, int weightUpdation, int type)
 {
-    /*
-    This function is called for creating new piece for character insertion
-    It navigates using weights and lengths of pieces
-    If index lies inside any piece, it breakes the piece in two parts and insert a new piece in between them.
-    */
     if (node == NULL)
     {
         pieceNode *newNode = new pieceNode(ADD, addString.length(), weightUpdation);
@@ -134,9 +113,7 @@ pieceNode *PieceTable::createInsert(pieceNode *node, char c, int index, int weig
     }
     else
     {
-
         //////////////////////////CREATE LEFT CHILD/////////////////////////////
-
         node->left = createInsert(node->left, c, index, index - node->weight, 1);
         current_piece->source = node->source;
         current_piece->start = node->start;
@@ -145,10 +122,7 @@ pieceNode *PieceTable::createInsert(pieceNode *node, char c, int index, int weig
         current_piece->height = 1;
         current_piece->weight = 0;
 
-        
-
         //////////////////////////CREATE RIGHT CHILD////////////////////////////
-
         node->right = createInsert(node->right, c, index - node->weight - node->length, node->length + node->weight - index, 1);
         current_piece->source = node->source;
         current_piece->start = node->start + index - node->weight;
@@ -158,7 +132,7 @@ pieceNode *PieceTable::createInsert(pieceNode *node, char c, int index, int weig
         current_piece->weight = 0;
 
         node->weight += index - node->weight;
-
+        node->source=ADD;
         current_piece = node;
         currIndex=GlobalIndex;
         current_piece->start = addString.length();
@@ -166,13 +140,10 @@ pieceNode *PieceTable::createInsert(pieceNode *node, char c, int index, int weig
         addString.push_back(c);
     }
 
-
    return balanceFunction(node, index);
-};
+}
+
 int PieceTable::predecessor(pieceNode* node, pieceNode* &t, int i){
-    /*
-    This function finds predecessor of given node to update the current_piece value
-    */
     if(!node){ t = NULL; return 1; }
     if(node==current_piece){
         int k=0;
@@ -183,7 +154,6 @@ int PieceTable::predecessor(pieceNode* node, pieceNode* &t, int i){
             t=x;
         }
         return k;
-        
     }else if (i <= node->weight)
     {   
         return predecessor(node->left,t,i);
@@ -196,16 +166,22 @@ int PieceTable::predecessor(pieceNode* node, pieceNode* &t, int i){
     }
     return 1;
 }
+
 void PieceTable::deletion(int index , int lastStepType){
-     /*
-    This function is origin of deletion. 
-    state == 1 : Previous operation was insertion
-    state == 2 : Previous operation was deletion
-    state == 0 : Previous operation was NULL or cursor shift
-    */
+    // CRITICAL FIX: Check if we can delete
+    if(index <= 0 || !head || GlobalIndex <= 0){
+        return;
+    }
+    
     if(state==1){
+        if(!current_piece){
+            state = 0;
+            return;
+        }
+        
         weightUpdator(head,currIndex);
         state=2;
+        
         if(current_piece->length ==1){
             pieceNode* temp=NULL;
             int tempCount=delCount;
@@ -220,31 +196,53 @@ void PieceTable::deletion(int index , int lastStepType){
             head=AVLDeletion(head,index-1);
             current_piece=temp;
             delCount=0;
-
-
+            
+            // FIX: If predecessor is NULL, reset state to 0
+            if(!current_piece){
+                state = 0;
+            }
         }else{
             current_piece->length--;
             deletedChar=(current_piece->source==ADD)?addString[current_piece->start+current_piece->length]:originalString[current_piece->start+current_piece->length];
             GlobalIndex--;
             currIndex--;
-
         }
-        
 
         if(lastStepType==0){
             if(lastStepLength>0)undo.push(new laststep(undoType , lastStepLength , cursorStart, charStack));
             charStack.clear();
             undoType = subtraction;
-            // start2 = addString.length();
             lastStepLength = 1;
             cursorStart = GlobalIndex+1;
             charStack.push_back(deletedChar);
 
             while(!redo.empty()) { delete redo.top(); redo.pop(); }
         }
-
     }
     else if(state == 2){
+        if(!current_piece){
+            // FIX: If current_piece is NULL, reset state and use newDeletion
+            state = 0;
+            head = newDeletion(head, index);
+            
+            if(lastStepType==0){
+                if(lastStepLength>0)undo.push(new laststep(undoType , lastStepLength , cursorStart , charStack));
+                charStack.clear();
+                undoType = subtraction;
+                lastStepLength = 1;
+                cursorStart = GlobalIndex+1;
+                charStack.push_back(deletedChar);
+
+                while(!redo.empty()) { delete redo.top(); redo.pop(); }
+            }
+            return;
+        }
+        
+        if(!head){
+            state = 0;
+            return;
+        }
+        
         if(current_piece->length ==1){
             pieceNode* temp=NULL;
             int tempCount=delCount;
@@ -258,6 +256,11 @@ void PieceTable::deletion(int index , int lastStepType){
             head=AVLDeletion(head,index-1);
             current_piece=temp;
             delCount=0;
+            
+            // FIX: If predecessor is NULL, reset state to 0
+            if(!current_piece){
+                state = 0;
+            }
         }else{
             current_piece->length--;
             deletedChar=(current_piece->source==ADD)?addString[current_piece->start+current_piece->length]:originalString[current_piece->start+current_piece->length];
@@ -269,7 +272,6 @@ void PieceTable::deletion(int index , int lastStepType){
             lastStepLength++;
             charStack.push_back(deletedChar);
         }
-
     }else{
         head = newDeletion(head,index);
         state=2;
@@ -286,12 +288,8 @@ void PieceTable::deletion(int index , int lastStepType){
         }
     }
 }
+
 pieceNode* PieceTable::newDeletion(pieceNode* node, int index){
-    /*
-    This function is called when deletion operation starts at a particular index
-    It finds the piece where the index lies and performs deletion
-    If the index lies inside the piece, it breaks the piece in two and delete from one
-    */
     if (!node) return NULL;      
     if (index <= node->weight){
         node->left = newDeletion(node->left, index);
@@ -310,6 +308,11 @@ pieceNode* PieceTable::newDeletion(pieceNode* node, int index){
             node=AVLDeletion(node,index-1);
             current_piece=temp;
             delCount=0;
+            
+            // FIX: If predecessor is NULL, reset state to 0
+            if(!current_piece){
+                state = 0;
+            }
         }else{
             current_piece->length--;
             deletedChar=(current_piece->source==ADD)?addString[current_piece->start+current_piece->length]:originalString[current_piece->start+current_piece->length];
@@ -317,7 +320,6 @@ pieceNode* PieceTable::newDeletion(pieceNode* node, int index){
             currIndex=GlobalIndex;
         }
     }else{
-        
         node->left=createInsert(node->left,'a',index,index-node->weight,1);
         current_piece->source = node->source;
         current_piece->start = node->start;
@@ -339,34 +341,30 @@ pieceNode* PieceTable::newDeletion(pieceNode* node, int index){
             node->left=AVLDeletion(node->left,index-1);
             current_piece=temp;
             delCount=0;
+            
+            // FIX: If predecessor is NULL, reset state to 0
+            if(!current_piece){
+                state = 0;
+            }
         }
     }
     return balanceFunction(node, index);
 }
+
 pieceNode *minValueNode(pieceNode *node)
 {
-    /*
-    Finds leftmost node of node
-    */
     pieceNode *current = node;
     while (current->left){
         current = current->left;
     }
     return current;
 }
+
 pieceNode* PieceTable::AVLDeletion(pieceNode *node, int index, pieceNode* type){
-    /*
-    This function is used to delete a piece if it's length becomes zero
-    */
     if (!node) return NULL; 
     if(node->length==0||type==node){
-
-    // Delete node
-
-        if ((node->left == nullptr) || 
-            (node->right == nullptr)) {
-            pieceNode *temp = node->left ? 
-            node->left : node->right;
+        if ((node->left == nullptr) || (node->right == nullptr)) {
+            pieceNode *temp = node->left ? node->left : node->right;
             if (temp == nullptr) {
                 temp = node;
                 node = NULL;
@@ -386,11 +384,7 @@ pieceNode* PieceTable::AVLDeletion(pieceNode *node, int index, pieceNode* type){
             node->source = temp->source;
             node->right = AVLDeletion(node->right, index-node->weight-node->length,temp);
         }
-    
     }   
-    
-    // Navigate
-
     else if (index <= node->weight){
         node->left = AVLDeletion(node->left, index, type);
     }
@@ -407,16 +401,15 @@ pieceNode* PieceTable::AVLDeletion(pieceNode *node, int index, pieceNode* type){
     }
     
     node = balanceFunction(node, index);
-    node->weight = subChar(node->left);
-    node->height = 1 + max(height(node->left), height(node->right));
+    if(node){  // FIX: Add NULL check before accessing
+        node->weight = subChar(node->left);
+        node->height = 1 + max(height(node->left), height(node->right));
+    }
     return node;
 }
+
 pieceNode *PieceTable::balanceFunction(pieceNode *node, int index)
 {
-    /*
-    Rotates pieces to keep tree balanced.
-    After rotation it computes changes in weights and assigns them.
-    */
     if(!node){return NULL;}
     node->height = 1 + max(height(node->left), height(node->right));
     int balance = getBalance(node);
@@ -441,20 +434,15 @@ pieceNode *PieceTable::balanceFunction(pieceNode *node, int index)
     node->weight = subChar(node->left);
     node->height = 1 + max(height(node->left), height(node->right));
     return node;
-};
+}
+
 void PieceTable::undofn()
 {
-    /*
-    Uses stack to perform the reverse action of latestStep
-    */
     if(lastStepLength>0) undo.push(new laststep(undoType  , lastStepLength , cursorStart , charStack));
     lastStepLength=0;
     if(undo.empty())return;
     laststep* latest = undo.top();
     
-    /*
-    If the last action was insertion
-    */
     if(latest->command == addition){
         int cursor2 = latest->lastStepLength + latest->cursorStart ;
         GlobalIndex = cursor2;
@@ -468,10 +456,6 @@ void PieceTable::undofn()
         redo.push(latest);
         undo.pop();
     }
-
-    /*
-    If the last action was deletion
-    */
     else if(latest->command == subtraction){
         int cursor2 = latest->cursorStart - latest->lastStepLength;
         GlobalIndex = cursor2;
@@ -484,19 +468,13 @@ void PieceTable::undofn()
         undo.pop();
     }
     lastStepLength=0;
-    
 }
+
 void PieceTable::redofn()
 {
-    /*
-    Uses stack to perform the reverse action of that performed by Undo
-    */
     if(redo.empty())return;
     laststep* latest = redo.top();
     
-    /*
-    If undo previously performed insertion
-    */
     if(latest->command == subtraction){
         int cursor2 = latest->cursorStart ; 
         GlobalIndex = cursor2 ;
@@ -510,10 +488,6 @@ void PieceTable::redofn()
         undo.push(latest);
         redo.pop();
     }
-
-    /*
-    If undo previously performed deletion
-    */
     else if(latest->command == addition){
         int cursor2 = latest->cursorStart ;
         GlobalIndex = cursor2;

@@ -1,48 +1,42 @@
 #include "PieceTable.h"
 #include <bits/stdc++.h>
 using namespace std;
+
+
+// ============ helper.cpp ============
 int height(pieceNode *N)
 {
     if (N == nullptr)
         return 0;
     return N->height;
 }
+
 int getBalance(pieceNode *N)
 {
     if (N == nullptr)
         return 0;
     return height(N->left) - height(N->right);
 }
+
 pieceNode *rightRotate(pieceNode *y)
 {
     pieceNode *x = y->left;
     pieceNode *T2 = x->right;
-
-    // Perform rotation
     x->right = y;
     y->left = T2;
-
-    // Update heights
     y->height = 1 + max(height(y->left), height(y->right));
     x->height = 1 + max(height(x->left), height(x->right));
-
-    // Return new root
     return x;
 }
+
 pieceNode *leftRotate(pieceNode *x)
 {
     pieceNode *y = x->right;
     pieceNode *T2 = y->left;
-
-    // Perform rotation
     y->left = x;
     x->right = T2;
-
-    // Update heights
     x->height = 1 + max(height(x->left), height(x->right));
     y->height = 1 + max(height(y->left), height(y->right));
-
-    // Return new root
     return y;
 }
 
@@ -51,20 +45,23 @@ std::string PieceTable::printTrial(pieceNode* node) {
     std::string str=(node->source==ADD)?addString.substr(node->start,node->length):originalString.substr(node->start,node->length);
     return printTrial(node->left)+str+printTrial(node->right);
 }
+
 void insertChar(PieceTable &P, char c, int &cursor){
     P.insert(c,cursor,0);
     cursor++;
 }
-void deleteChar(PieceTable P, int &cursor){
-     if(P.state!=2)P.delCount=0;
-            P.delCount++;
-            P.deletion(cursor,0);
-            cursor--;
+
+void deleteChar(PieceTable &P, int &cursor){
+    // CRITICAL FIX: Sync cursor with GlobalIndex after deletion
+    if(cursor > 0 && P.GlobalIndex > 0){
+        if(P.state!=2)P.delCount=0;
+        P.delCount++;
+        P.deletion(cursor,0);
+        cursor = P.GlobalIndex;  // Sync with internal index
+    }
 }
 
-// --------------------- UNDO / REDO WRAPPERS ------------------
 void performUndo(PieceTable &P, int &cursor) {
-    // finalize current editing session
     if(P.lastStepLength>0) P.undo.push(new laststep(P.undoType  , P.lastStepLength , P.cursorStart , P.charStack));
     P.lastStepLength=0;
     if(P.state==2){P.weightUpdator2(P.head,P.currIndex);P.delCount=0;P.current_piece=NULL;}

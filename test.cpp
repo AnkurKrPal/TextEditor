@@ -15,10 +15,12 @@ int main(){
             
         }else if(c=='5'){       // backspace
             //P.deletion(cursor);
-            if(P.state!=2)P.delCount=0;
-            P.delCount++;
-            P.deletion(cursor,0);
-            cursor--;
+            if( P.GlobalIndex > 0){
+                if(P.state!=2)P.delCount=0;
+                P.delCount++;
+                P.deletion(cursor,0);
+                cursor = P.GlobalIndex;  // Sync with internal index instead of just decrementing
+            }
 
         }else if(c=='4'){       // left
             cursor--;

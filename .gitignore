@@ -2,9 +2,16 @@
 *.exe
 *.dSYM/
 *.app
+*.pro
+*.o
 
 # Qt
 build/
 gui/CMakeLists.txt
+*.qmake.stash
+Makefile
+moc_mainwindow.cpp
+moc_predefs.h
 # VSCode
 .vscode/
+bits/

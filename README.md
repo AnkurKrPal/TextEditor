@@ -1,4 +1,4 @@
-# Superfast Text Editor - Powered by Piece Table + AVL Tree
+# Text Editor - Using Piece Table & AVL Tree
 
 A **high-performance text editor** built using C++ and Qt, designed to handle large files efficiently with **instant editing** and **smooth cursor movement**.
 At its core, it uses a **Piece Table** integrated with an **AVL Tree**, providing extremely fast insertions and deletions without copying large amounts of text.
@@ -17,9 +17,9 @@ At its core, it uses a **Piece Table** integrated with an **AVL Tree**, providin
 
 ---
 
-## 🧠 Core Data Structure: Piece Table + AVL Tree
+## Core Data Structure: Piece Table + AVL Tree
 
-### 🧩 Piece Table
+### Piece Table
 
 A **Piece Table** is a text-editing data structure that avoids moving or rewriting text.
 It maintains two buffers:
@@ -65,19 +65,19 @@ AVL Trees ensure the editor remains efficient even with thousands of edits:
 
 ---
 
-## ⚙️ Comparison with Other Data Structures
+## Comparison with Other Data Structures
 
 | Operation                 | Array Buffer | Gap Buffer  | Rope Tree | **Piece Table + AVL Tree (This Project)** |
 | ------------------------- | ------------ | ----------- | --------- | ----------------------------------------- |
-| Insert in middle          | O(n)         | O(n) amort. | O(log n)  | **O(log n)** ✅                            |
-| Delete in middle          | O(n)         | O(n) amort. | O(log n)  | **O(log n)** ✅                            |
-| Memory usage              | High         | High        | Moderate  | **Low (metadata only)** ✅                 |
-| Implementation complexity | Low          | Moderate    | High      | **Moderate, but efficient** ✅             |
-| Large file performance    | ❌ Poor       | ⚠️ Medium   | ✅ Good    | **✅ Excellent**                           |
+| Insert in middle          | O(n)         | O(n) amort. | O(log n)  | **O(log n)**                              |
+| Delete in middle          | O(n)         | O(n) amort. | O(log n)  | **O(log n)**                              |
+| Memory usage              | High         | High        | Moderate  | **Low (metadata only)**                   |
+| Implementation complexity | Low          | Moderate    | High      | **Moderate, but efficient**               |
+| Large file performance    |  Poor        | Medium      | Good      | **Excellent**                             |
 
 ---
 
-## 🔄 Undo / Redo Support
+## Undo / Redo Support
 
 The editor uses **two stacks** for undo and redo operations:  
 one for tracking edits (undo stack) and another for reverted actions (redo stack).  
@@ -88,7 +88,7 @@ Each undo/redo step internally performs AVL-based insert/delete operations, resu
 
 ---
 
-## 🛠️ Build Instructions
+## Build Instructions
 
 ### Requirements
 
@@ -97,15 +97,15 @@ Each undo/redo step internally performs AVL-based insert/delete operations, resu
 
 ### Steps
 
-```
 In Command Palette (Ctrl + Shift + P) run these commands:
+```
 CMake: Build
 Cmake: Run Without Debugging
 ```
 
 ---
 
-## 📁 File Overview
+## File Overview
 
 | File                  | Description                                    |
 | --------------------- | ---------------------------------------------- |
@@ -117,7 +117,7 @@ Cmake: Run Without Debugging
 
 ---
 
-## 📈 Performance Highlights
+## Performance Highlights
 
 * Large files are represented compactly through references — not copied.
 * Edits modify only metadata (pointers and lengths).
@@ -126,7 +126,7 @@ Cmake: Run Without Debugging
 
 ---
 
-## 🧮 Time Complexity Summary
+## Time Complexity Summary
 
 | Operation   | Complexity | Description                         |
 |-------------|------------|-------------------------------------|
@@ -138,7 +138,7 @@ Cmake: Run Without Debugging
 
 ---
 
-## ⚡ Why This Approach is Optimal
+## Why This Approach is Optimal
 
 - Unlike traditional buffer-based editors that rewrite large chunks of text,  
   this editor only **modifies structural metadata** (Piece Table + AVL nodes).
